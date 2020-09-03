@@ -3,3 +3,5 @@ services:
   flask:
     build: .
     image: mathlm:latest
+    ports:
+      - "5000"
