@@ -4,4 +4,4 @@ services:
     build: .
     image: mathlm:latest
     ports:
-      - "5000"
+      - "5000:5000"
