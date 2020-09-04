@@ -3,4 +3,5 @@ For better performance on Windows, install (Windows Subsystem for Linux 2)[https
 
 The Dockerfile in this repo configures the image environment for our app. Docker-Compose is used as a simple way to do cross-platform building. It reduces the number of commands that have to be run manually, while avoiding platform-dependent bash or batch scripts.
 
-Run docker-compose up --build to build and run the image with app.py.
+Run `docker-compose build` to build the image, including code changes.
+Run `docker-compose run --entrypoint bash flask` to launch the container and drop into a shell for development.

@@ -1,3 +1,6 @@
+# This is a docker compose configuration file for development ONLY.
+# A new one will need to be written for production, without bind mounts, and other changes.
+
 version: '2.0'
 services:
   flask:
@@ -5,3 +8,5 @@ services:
     image: mathlm:latest
     ports:
       - "5000:5000"
+    volumes:
+      - .:/app # Mount the current directory in the container, so changes made in the container are reflected on the host.

@@ -9,18 +9,29 @@ MAINTAINER Spencer Brown "sbrow420@students.kennesaw.edu"
 # install necessary packages.
 # This will be cached, and not rerun at every image build.
 RUN apt-get update -y && \
-    apt-get install -y python3-dev && apt-get install -y python3-pip
+    apt-get install -y python3-dev && apt-get install -y python3-pip && \
+    apt-get install -y python3-venv
 
-# Copy the requirements.txt into the image.
-# Copy this first so that changes can be cached.
-COPY ./requirements.txt /app/requirements.txt
+WORKDIR /env
+
+# setup virtual environment
+ENV VIRTUAL_ENV=/env
+RUN python3 -m venv $VIRTUAL_ENV
+
+# activate virtual environment.
+# We don't use env/bin/activate because docker. See https://pythonspeed.com/articles/activate-virtualenv-dockerfile/
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 WORKDIR /app
+# copy dependencies before mounting project into container
+COPY ./requirements.txt /app/requirements.txt
 
-RUN pip3 install -r requirements.txt
+# get dependencies with pip using requirements.txt
+RUN pip install -r requirements.txt
 
-COPY . /app
-
-ENTRYPOINT [ "python3" ]
-
-CMD [ "app.py" ]
+# run the application on container start
+ENV FLASK_APP=flask/flaskapp/flaskapp.py
+ENV FLASK_ENV=development
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+CMD flask run
