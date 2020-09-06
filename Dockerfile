@@ -2,7 +2,7 @@
 # Each time the image is built, docker will only rerun commands as necessary.
 # In practice, this means that the first build takes a while, but subsequent ones are much faster, if the dockerfile is well-ordered.
 
-FROM ubuntu:16.04
+FROM ubuntu:20.04
 
 MAINTAINER Spencer Brown "sbrow420@students.kennesaw.edu"
 
