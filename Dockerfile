@@ -10,7 +10,7 @@ MAINTAINER Spencer Brown "sbrow420@students.kennesaw.edu"
 # This will be cached, and not rerun at every image build.
 RUN apt-get update -y && \
     apt-get install -y python3-dev && apt-get install -y python3-pip && \
-    apt-get install -y python3-venv
+    apt-get install -y python3-venv && apt-get install -y git
 
 WORKDIR /env
 
