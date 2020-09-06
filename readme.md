@@ -22,7 +22,8 @@ VS Code is recommended for development. Install the "Remote - Containers" extens
 ### Developing in VS Code
 1. Clone the repo from Github and switch to your branch.
 2. Open the project folder in VS Code.
-3. Ctrl+Shift+P to open the command palatte (or Click the green icon at the bottom left of the window) and run "Remote-Containers: Open in Container".
+3. Before the first launch, Open the terminal and run `docker-compose build` to build the image.
+4. Ctrl+Shift+P to open the command palatte (or Click the green icon at the bottom left of the window) and run "Remote-Containers: Open in Container".
 
 The project will open in a docker container, with VS Code attached.
 
