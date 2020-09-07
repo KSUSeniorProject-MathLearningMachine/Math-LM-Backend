@@ -34,4 +34,4 @@ ENV FLASK_APP=flask/flaskapp/flaskapp.py
 ENV FLASK_ENV=development
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
-CMD flask run
+CMD flask run --host=0.0.0.0
