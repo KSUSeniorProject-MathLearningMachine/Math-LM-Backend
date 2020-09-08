@@ -20,3 +20,7 @@ sortedcontainers==2.2.2
 toml==0.10.1
 Werkzeug==1.0.1
 zipp==3.1.0
+requests==2.24.0
+sympy==1.6.2
+latex2sympy==1.0.3
+antlr4-python3-runtime==4.8

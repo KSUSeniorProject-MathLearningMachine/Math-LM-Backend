@@ -26,6 +26,9 @@ WORKDIR /app
 # copy dependencies before mounting project into container
 COPY ./requirements.txt /app/requirements.txt
 
+# make sure wheel is installed before requirements
+RUN pip install wheel==0.35.1
+
 # get dependencies with pip using requirements.txt
 RUN pip install -r requirements.txt
 
