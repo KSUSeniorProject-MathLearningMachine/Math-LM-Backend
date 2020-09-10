@@ -1,9 +1,10 @@
 import requests
+import os
 
+APP_ID = os.environ['MATHPIX_APP_ID']
+APP_KEY = os.environ['MATHPIX_APP_KEY']
 
 BASE_URL = "https://api.mathpix.com/v3"
-APP_ID = "spencerb_warpmail_net_6b5480"
-APP_KEY = "59e12123f380e59b4514"
 HEADERS = {"Content-Type": "application/json", "app_id": APP_ID, "app_key": APP_KEY}
 
 
