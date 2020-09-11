@@ -4,6 +4,8 @@
 version: '2.0'
 services:
   flask:
+    env_file:
+      - "mathpix-variables.env"
     build: .
     image: mathlm:latest
     ports:

@@ -1,8 +1,7 @@
-import sys
-from flask import Flask, request, jsonify
-import requests
-from sympy.parsing.latex import parse_latex
-from sympy import latex
+import mathpix
+import latex_solver
+from flask import Flask, request
+
 app = Flask(__name__)
 
 @app.route('/')
@@ -11,40 +10,39 @@ def hello_world():
 
 @app.route('/mathpix-ocr', methods=['POST'])
 def mathpix_ocr():
-    body = request.get_json()
-    img = body['b64_img']
-    data = {"src":"data:image/png;base64,"+img}
-    headers = {"Content-Type":"application/json","app_id":"spencerb_warpmail_net_6b5480","app_key":"59e12123f380e59b4514"}
-    url = "https://api.mathpix.com/v3/text"
-    response = requests.post(url, headers=headers, json=data)
-    return response.json(), response.status_code
+    img = request.get_json()['b64_img']
+
+    try:
+        return mathpix.submit_text(img)
+    except mathpix.MathpixApiException as e:
+        return e, 500
 
 @app.route('/solve-image', methods=['POST'])
 def solve_image():
     body = request.get_json()
-    response = requests.post('http://0.0.0.0:5000/mathpix-ocr', json=body)
-    print("Response", file=sys.stdout)
-    if response.status_code != 200:
-        return response.text, response.status_code
-    latex_styled = response.json()['latex_styled']
-    new_latex = r'{}'.format(latex_styled)
-    print("new latex: {}".format(new_latex))
-    expr = parse_latex(new_latex)
+
     try:
-        data = {'solved':str(latex(expr.doit())), 'input_detected':new_latex, 'confidence':response.json()['confidence']}
-        print("Doit: {}".format(data), file=sys.stdout)
+        response = mathpix.submit_text(body['b64_img'])
+        latex_styled = response['latex_styled']
+
+        data = {
+            'solved': latex_solver.solve(latex_styled),
+            'input_detected': latex_solver.format_latex(latex_styled),
+            'confidence': response['confidence']
+        }
+
         return data, 200
-    except Exception as e:
-        return str(e), 400
+    except mathpix.MathpixApiException as e:
+        return e, 500
+
 
 @app.route('/solve-latex', methods=['POST'])
 def solve_latex():
-    body = request.get_json()
-    latex_styled = body['latex']
-    new_latex = r'{}'.format(latex_styled)
-    expr = parse_latex(new_latex)
+    latex_styled = request.get_json()['latex']
     try:
-        data = {'solved':str(latex(expr.doit()))}
+        data = {
+            'solved': latex_solver.solve(latex_styled)
+        }
         return data, 200
     except Exception as e:
         return str(e), 400

@@ -1,3 +1,5 @@
 __pycache__
 .pytest_cache
 flaskenv/
+.idea/
+mathpix-variables.env

@@ -32,6 +32,9 @@ Your git credentials will be shared from your local host to the container, so gi
 Open the integrated terminal to run commands in the container.
 
 ## Running Application
+
+> See [Docker Usage](./docs/docker.md) for Docker-specific instructions.
+
 `$ flask run` will start the flask development server and send requests to the flask application.
 
 ## Running Unit Tests
