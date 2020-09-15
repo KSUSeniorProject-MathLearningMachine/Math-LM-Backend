@@ -12,7 +12,7 @@ class MathpixApiException(Exception):
     pass
 
 def submit_text(b64_image):
-    data = { "src": "data:image/png;base64," + b64_image }
+    data = { "src": b64_image }
     url = BASE_URL + "/text"
     response = requests.post(url, headers=HEADERS, json=data)
 
