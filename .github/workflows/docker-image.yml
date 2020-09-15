@@ -1,0 +1,27 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ development ]
+  pull_request:
+    branches: [ development ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Update the environment files
+      run: |
+        echo "MATHPIX_APP_KEY=${{ secrets.MATHPIX_APP_KEY }}" >> mathpix-variables.env
+        echo "MATHPIX_APP_ID=${{ secrets.MATHPIX_APP_ID }}" >> mathpix-variables.env
+    - name: Build the Docker image
+      run: |
+        docker-compose build
+    - name: Run the test suite
+      run: |
+        docker-compose run flask bash -c "cd /app/flask/flaskapp && python -m pytest"
+        
