@@ -37,5 +37,10 @@ Open the integrated terminal to run commands in the container.
 
 `$ flask run` will start the flask development server and send requests to the flask application.
 
-## Running Unit Tests
-Run pytest in the top-level project directory to start unit tests.
+## Running Tests
+
+To run the tests:
+
+1. Enable the python virtual environment
+1. Run `cd flask/flaskapp`
+1. Run `python -m pytest`
