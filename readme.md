@@ -41,6 +41,6 @@ Open the integrated terminal to run commands in the container.
 
 To run the tests:
 
-1. Enable the python virtual environment
-1. Run `cd flask/flaskapp`
-1. Run `python -m pytest`
+    $ docker-compose build
+    $ docker-compose run flask bash -c "cd /app/flask/flaskapp && python -m pytest"
+
