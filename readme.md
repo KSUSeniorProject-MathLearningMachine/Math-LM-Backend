@@ -39,3 +39,66 @@ Open the integrated terminal to run commands in the container.
 
 ## Running Unit Tests
 Run pytest in the top-level project directory to start unit tests.
+
+## Public API
+
+### Solve Image
+
+**URI**: `/solve-image`
+
+**Method**: POST
+
+**Request Body**:
+
+    {
+        "b64_img": (str) "BASE64ENCODEDIMAGE"
+    }
+    
+**Response Body**:
+
+    {
+        "confidence": (number) CONFIDENCE_VALUE_FROM_MATHPIX,
+        "input_detected": (str) "LATEX_STRING_OF_INPUT_DETECTED_FROM_MATHPIX",
+        "solved": (str) "LATEX_STRING_OF_CAS_SOLUTION_TO_PROBLEM"
+    }
+
+### Solve Latex
+
+**URI**: `/solve-latex`
+
+**Method**: POST
+
+**Request Body**:
+
+    {
+        "latex": (str) "LATEX_TO_BE_SOLVED"
+    }
+    
+**Response Body**:
+
+    {
+        "solved": (str) "LATEX_STRING_OF_CAS_SOLUTION_TO_PROBLEM"
+    }
+
+### Mathpix OCR
+
+**URI**: `/mathpix-ocr`
+
+**Method**: POST
+
+**Request Body**:
+
+    {
+        "b64_img":(str)"BASEBASE64ENCODEDIMAGE"
+    }
+    
+**Response Body**:
+
+    {
+        "confidence":(number) CONFIDENCE_VALUE_FROM_MATPHIX,
+        "confidence_rate":(number) CONFIDENCE_RATE_FROM_MATHPIX,
+        "latex_styled":(str) "LATEX_STRING_OF_INPUT_DETECTED_FROM_MATHPIX",
+        "request_id":(str) Doesn't mean anything to us,
+        "text":(str) Doesnt mean much as we are using latex
+    }
+
