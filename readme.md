@@ -37,8 +37,13 @@ Open the integrated terminal to run commands in the container.
 
 `$ flask run` will start the flask development server and send requests to the flask application.
 
-## Running Unit Tests
-Run pytest in the top-level project directory to start unit tests.
+## Running Tests
+
+To run the tests:
+
+    $ docker-compose build
+    $ docker-compose run flask bash -c "cd /app/flask/flaskapp && python -m pytest"
+
 
 ## Public API
 
@@ -101,4 +106,6 @@ Run pytest in the top-level project directory to start unit tests.
         "request_id":(str) Doesn't mean anything to us,
         "text":(str) Doesnt mean much as we are using latex
     }
+
+
 
