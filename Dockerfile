@@ -8,9 +8,11 @@ MAINTAINER Spencer Brown "sbrow420@students.kennesaw.edu"
 
 # install necessary packages.
 # This will be cached, and not rerun at every image build.
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y && \
     apt-get install -y python3-dev && apt-get install -y python3-pip && \
-    apt-get install -y python3-venv && apt-get install -y git
+    apt-get install -y python3-venv && apt-get install -y git && \
+    apt-get install -yq ffmpeg libsm6 libxext6
 
 WORKDIR /env
 
@@ -30,7 +32,7 @@ COPY ./requirements.txt /app/requirements.txt
 RUN pip install wheel==0.35.1
 
 # get dependencies with pip using requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # run the application on container start
 ENV FLASK_APP=flask/flaskapp/flaskapp.py

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import os
 import sys
 
-OUTPUT_DIR = './segmented/'
+OUTPUT_DIR = '/segmented/'
 
 #------------------Functions------------------#
 
@@ -163,7 +163,6 @@ def letter_seg(lines_img, x_lines, i):
 
 	letter = sorted(letter_k, key=lambda student: student[0])
 	# print(letter)
-	
 	word = 1
 	letter_index = 0
 	for e in range(len(letter)):
@@ -192,7 +191,7 @@ def image_segmentation(pil_img):
 	# -------------Thresholding Image--------------#
 	print("\n........Program Initiated.......\n")
 	#src_img = cv2.imread(filepath, cv2.IMREAD_GRAYSCALE)
-	src_img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2GRAY)
+	src_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2GRAY)
 	orig_height, orig_width = src_img.shape
 
 	print("\n Resizing Image........")

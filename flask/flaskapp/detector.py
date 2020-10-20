@@ -7,6 +7,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array
 import cv2
 import CharacterSegmentation as cs
+import os
 
 
 def detect(b64_image):
@@ -22,10 +23,10 @@ def detect(b64_image):
 
     # load segmented images. TODO: make this less janky by keeping images in memory instead of filesystem
     segmented_images = []
-    files = [f for r, d, f in os.walk('./segmented/')][0]
+    files = [f for r, d, f in os.walk('/segmented/')][0]
     files = sorted(files)
     for f in files:
-        segmented_images.append(Image.open('./segmented/' + f))
+        segmented_images.append(Image.open('/segmented/' + f))
 
     model = load_model('/app/classification.model')
 
