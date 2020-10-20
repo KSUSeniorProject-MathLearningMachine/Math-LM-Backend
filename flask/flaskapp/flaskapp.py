@@ -1,5 +1,7 @@
 import mathpix
 import latex_solver
+import detector
+import object_parser
 from flask import Flask, request
 
 app = Flask(__name__)
@@ -7,6 +9,19 @@ app = Flask(__name__)
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
+
+@app.route('/ocr', methods=['POST'])
+def ocr():
+    img = request.get_json()['b64_img']
+
+    detections, confidence = detector.detect(img)
+
+    latex = object_parser.parse(detections)
+
+    return {
+        "confidence": confidence,
+        "latex_styled": latex,
+    }
 
 @app.route('/mathpix-ocr', methods=['POST'])
 def mathpix_ocr():
