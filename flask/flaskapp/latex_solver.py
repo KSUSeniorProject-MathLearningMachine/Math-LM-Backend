@@ -1,6 +1,6 @@
 from sympy.parsing.latex import parse_latex
 from sympy.parsing.latex import LaTeXParsingError
-from sympy import latex
+from sympy import latex, simplify
 
 def solve(latex_styled):
     latex_formatted = format_latex(latex_styled)
@@ -10,9 +10,7 @@ def solve(latex_styled):
         return "LaTeX parsing error"
 
     try:
-        result = latex(expr.doit())
-        #This is super generic because sympy evaluation isn't trivial. 
-        # We'll probably want to switch away from using doit() in the future, for more control.
+        result = latex(simplify(expr))
     except Exception:
         return "SymPy evaluation error"
     return str(result)

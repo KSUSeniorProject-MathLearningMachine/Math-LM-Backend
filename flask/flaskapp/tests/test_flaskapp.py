@@ -45,7 +45,7 @@ def test_solve_image(client, app):
 
     assert True == validate_json(instance=res.get_json(), schema=response_schema)
     assert r'F(0)=x' == res.get_json()['input_detected']
-    assert r'F{\left(0 \right)} = x' == res.get_json()['solved']
+    assert r'x = F{\left(0 \right)}' == res.get_json()['solved']
 
 
 def test_solve_latex(client, app):
