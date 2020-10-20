@@ -14,6 +14,8 @@ def detect(b64_image):
     """Apply the object detections and return a tuple of the detections as well as the confidence"""
 
     # load image from base64
+    b64_image = b64_image.split(",")[1]
+
     sbuf = BytesIO()
     sbuf.write(base64.b64decode(b64_image)) # may not work with uri prefix
     pil_img = Image.open(sbuf)
@@ -42,9 +44,9 @@ def detect(b64_image):
         predictedLabels.append(predictedLabel)
     
     # calculate confidence
-    overall_confidence = 0
-    for confidence in predictedLabels:
-        overall_confidence + confidence
-    overall_confidence = overall_confidence / len(predictedLabels)
+    #overall_confidence = 0
+    #for confidence in predictedLabels:
+    #    overall_confidence + confidence
+    #overall_confidence = overall_confidence / len(predictedLabels)
 
-    return (predictedLabels, overall_confidence)
+    return (predictedLabels, 1)
