@@ -7,6 +7,9 @@ import os
 import sys
 
 OUTPUT_DIR = '/segmented/'
+#if OUTPUT_DIR not in os.listdir('/'):
+#	os.mkdir(OUTPUT_DIR)
+
 
 #------------------Functions------------------#
 
@@ -238,13 +241,7 @@ def image_segmentation(pil_img):
 			lines.append((upperlines[y], lowerlines[y]))
 	else:
 		print("Too much noise in image, unable to process.\nPlease try with another image. Ctrl-C to exit:- ")
-		showimages()
-		k = cv2.waitKey(0)
-		while 1:
-			k = cv2.waitKey(0)
-			if k & 0xFF == ord('q'):
-				cv2.destroyAllWindows()
-				exit()
+		return
 
 	lines = np.array(lines)
 	no_of_lines = len(lines)

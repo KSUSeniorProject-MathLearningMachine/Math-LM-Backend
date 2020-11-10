@@ -32,8 +32,8 @@ def mathpix_ocr():
     except mathpix.MathpixApiException as e:
         return e, 500
 
-@app.route('/solve-image', methods=['POST'])
-def solve_image():
+@app.route('/solve-image-mathpix', methods=['POST'])
+def solve_image_mathpix():
     body = request.get_json()
 
     try:
@@ -50,6 +50,20 @@ def solve_image():
     except mathpix.MathpixApiException as e:
         return e, 500
 
+@app.route('/solve-image', methods=['POST'])
+def solve_image():
+    img = request.get_json()['b64_img']
+
+    detections, confidence = detector.detect(img)
+    latex = object_parser.parse(detections)
+
+    data = {
+        'solved': latex_solver.solve(latex),
+        'input_detected': latex_solver.format_latex(latex),
+        'confidence': confidence
+    }
+
+    return data, 200
 
 @app.route('/solve-latex', methods=['POST'])
 def solve_latex():
