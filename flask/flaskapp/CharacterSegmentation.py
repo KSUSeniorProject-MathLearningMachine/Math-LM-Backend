@@ -10,6 +10,23 @@ OUTPUT_DIR = '/segmented/'
 
 #------------------Functions------------------#
 
+def auto_crop(img):
+	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+	# threshold input image using otsu thresholding as mask and refine with morphology
+	ret, mask = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU) 
+	kernel = np.ones((9,9), np.uint8)
+	mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+	mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+
+	# put thresh into 
+	result = img.copy()
+	result = cv2.cvtColor(result, cv2.COLOR_BGR2BGRA)
+	result[:, :, 3] = mask
+
+	# save resulting masked image
+	return result
+
 def line_array(array):
 	list_x_upper = []
 	list_x_lower = []
