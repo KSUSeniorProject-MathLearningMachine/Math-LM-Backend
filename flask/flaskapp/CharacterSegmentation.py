@@ -208,6 +208,7 @@ def image_segmentation(pil_img):
 	# -------------Thresholding Image--------------#
 	print("\n........Program Initiated.......\n")
 	#src_img = cv2.imread(filepath, cv2.IMREAD_GRAYSCALE)
+	pil_img = auto_crop(pil_img)
 	src_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2GRAY)
 	orig_height, orig_width = src_img.shape
 
