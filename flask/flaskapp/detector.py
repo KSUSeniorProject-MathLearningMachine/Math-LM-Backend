@@ -19,6 +19,7 @@ def detect(b64_image):
     sbuf = BytesIO()
     sbuf.write(base64.b64decode(b64_image)) # may not work with uri prefix
     pil_img = Image.open(sbuf)
+    pil_img.save("img.jpg")
 
     # segment images
     cs.image_segmentation(pil_img)
