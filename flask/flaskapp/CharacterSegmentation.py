@@ -209,7 +209,7 @@ def image_segmentation(pil_img):
 	print("\n........Program Initiated.......\n")
 	#src_img = cv2.imread(filepath, cv2.IMREAD_GRAYSCALE)
 	src_img = auto_crop(pil_img)
-	cv2.imwrite("img.jpg", src_img)
+	cv2.imwrite("/home/seniorproject/Math-LM-Backend/img.jpg", src_img)
 	orig_height, orig_width = src_img.shape
 
 	print("\n Resizing Image........")

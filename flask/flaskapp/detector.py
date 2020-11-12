@@ -9,27 +9,21 @@ import cv2
 import CharacterSegmentation as cs
 import os
 
+def readb64(base64_string):
+    sbuf = BytesIO()
+    sbuf.write(base64.b64decode(base64_string))
+    pimg = Image.open(sbuf)
+    return cv2.cvtColor(np.array(pimg), cv2.COLOR_RGB2BGR)
 
 def detect(b64_image):
     """Apply the object detections and return a tuple of the detections as well as the confidence"""
 
     # load image from base64
     b64_image = b64_image.split(",")[1]
-
-    f = open("temp.jpg", 'wb')
-    f.write(base64.b64decode(b64_image))
-    f.close()
-    i = cv2.imread("temp.jpg")
-
-    """
-    sbuf = BytesIO()
-    sbuf.write(base64.b64decode(b64_image)) # may not work with uri prefix
-    pil_img = Image.open(sbuf)
-    pil_img.save("img.jpg")
-    """
+    img = readb64(b64_image)
 
     # segment images
-    cs.image_segmentation(i)
+    cs.image_segmentation(img)
 
     # load segmented images. TODO: make this less janky by keeping images in memory instead of filesystem
     segmented_images = []
