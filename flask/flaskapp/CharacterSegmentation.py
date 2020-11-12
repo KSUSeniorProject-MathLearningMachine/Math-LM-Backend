@@ -210,7 +210,7 @@ def image_segmentation(pil_img):
 	#src_img = cv2.imread(filepath, cv2.IMREAD_GRAYSCALE)
 	src_img = auto_crop(pil_img)
 	cv2.imwrite("/home/seniorproject/Math-LM-Backend/img.jpg", src_img)
-	orig_height, orig_width = src_img.shape
+	orig_height, orig_width, orig_depth = src_img.shape
 
 	print("\n Resizing Image........")
 	width = 1320
