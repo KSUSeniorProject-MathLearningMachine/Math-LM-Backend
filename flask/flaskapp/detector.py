@@ -16,13 +16,20 @@ def detect(b64_image):
     # load image from base64
     b64_image = b64_image.split(",")[1]
 
+    f = open("temp.jpg", 'wb')
+    f.write(base64.b64decode(b64_image))
+    f.close()
+    i = cv2.imread("temp.jpg")
+
+    """
     sbuf = BytesIO()
     sbuf.write(base64.b64decode(b64_image)) # may not work with uri prefix
     pil_img = Image.open(sbuf)
     pil_img.save("img.jpg")
+    """
 
     # segment images
-    cs.image_segmentation(pil_img)
+    cs.image_segmentation(i)
 
     # load segmented images. TODO: make this less janky by keeping images in memory instead of filesystem
     segmented_images = []
