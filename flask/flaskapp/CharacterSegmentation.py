@@ -11,7 +11,7 @@ OUTPUT_DIR = '/segmented/'
 #------------------Functions------------------#
 
 def auto_crop(img):
-	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+	gray = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2GRAY)
 
 	# threshold input image using otsu thresholding as mask and refine with morphology
 	ret, mask = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU) 
