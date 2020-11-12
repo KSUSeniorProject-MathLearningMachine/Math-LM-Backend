@@ -20,6 +20,7 @@ def detect(b64_image):
 
     # load image from base64
     b64_image = b64_image.split(",")[1]
+    return (b64_image, 1)
     img = readb64(b64_image)
 
     # segment images
