@@ -257,7 +257,6 @@ def image_segmentation(pil_img):
 			lines.append((upperlines[y], lowerlines[y]))
 	else:
 		print("Too much noise in image, unable to process.\nPlease try with another image. Ctrl-C to exit:- ")
-		showimages()
 		k = cv2.waitKey(0)
 		while 1:
 			k = cv2.waitKey(0)
