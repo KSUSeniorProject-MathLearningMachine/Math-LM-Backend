@@ -255,12 +255,7 @@ def image_segmentation(pil_img):
 			lines.append((upperlines[y], lowerlines[y]))
 	else:
 		print("Too much noise in image, unable to process.\nPlease try with another image. Ctrl-C to exit:- ")
-		k = cv2.waitKey(0)
-		while 1:
-			k = cv2.waitKey(0)
-			if k & 0xFF == ord('q'):
-				cv2.destroyAllWindows()
-				exit()
+		return
 	
 	lines = np.array(lines)
 	no_of_lines = len(lines)
@@ -271,7 +266,7 @@ def image_segmentation(pil_img):
 		lines_img.append(bin_img[lines[i][0]:lines[i][1], :])
 
 	# -------------/Line Detection-----------------#
-	return
+	
 	# -------------Letter Width Calculation--------#
 
 	contours, hierarchy = cv2.findContours(contr_retrival, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
