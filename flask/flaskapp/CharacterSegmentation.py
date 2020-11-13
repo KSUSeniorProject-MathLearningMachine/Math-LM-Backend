@@ -227,6 +227,8 @@ def image_segmentation(pil_img):
 	bin_img = cv2.adaptiveThreshold(cv2.cvtColor(src_img, cv2.COLOR_BGR2GRAY), PIXEL_SET, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, kernel_size,
 									normalized_mean)
 
+	return
+
 	print("Noise Removal From Image.........")
 	kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
 	final_thr = cv2.morphologyEx(bin_img, cv2.MORPH_CLOSE, kernel)
