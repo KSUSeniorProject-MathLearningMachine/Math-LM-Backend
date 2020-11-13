@@ -106,8 +106,10 @@ def refine_array(array_upper, array_lower):
 		if array_lower[y] + 5 < array_lower[y+1]:
 			lowerlines.append(array_lower[y]+10)
 
-	upperlines.append(array_upper[-1]-10)
-	lowerlines.append(array_lower[-1]+10)
+	to_append_u = array_upper[-1]
+	to_append_l = array_lower[-1]
+	upperlines.append(to_append_u-10)
+	lowerlines.append(to_append_l+10)
 	
 	return upperlines, lowerlines
 
