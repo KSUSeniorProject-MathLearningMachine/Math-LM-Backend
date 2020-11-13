@@ -24,6 +24,7 @@ def detect(b64_image):
 
     # segment images
     cs.image_segmentation(img)
+    return ("Hello", 1)
 
     # load segmented images. TODO: make this less janky by keeping images in memory instead of filesystem
     segmented_images = []
