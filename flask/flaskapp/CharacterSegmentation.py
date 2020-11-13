@@ -209,7 +209,6 @@ def image_segmentation(pil_img):
 	print("\n........Program Initiated.......\n")
 	#src_img = cv2.imread(filepath, cv2.IMREAD_GRAYSCALE)
 	src_img = auto_crop(pil_img)
-	cv2.imwrite("/home/seniorproject/Math-LM-Backend/img.jpg", src_img)
 	orig_height, orig_width, orig_depth = src_img.shape
 
 	print("\n Resizing Image........")
@@ -225,7 +224,7 @@ def image_segmentation(pil_img):
 	PIXEL_SET = 255
 	kernel_size = 21
 	normalized_mean = 20
-	bin_img = cv2.adaptiveThreshold(src_img, PIXEL_SET, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, kernel_size,
+	bin_img = cv2.adaptiveThreshold(cv2.cvtColor(src_img, cv2.COLOR_BGR2GRAY), PIXEL_SET, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, kernel_size,
 									normalized_mean)
 
 	print("Noise Removal From Image.........")
