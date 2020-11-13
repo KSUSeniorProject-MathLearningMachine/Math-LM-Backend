@@ -16,7 +16,10 @@ def ocr():
 
     detections, confidence = detector.detect(img)
 
-    return { "grant": detections }
+    if detections[0] == 'E':
+        return {
+            "Error": detections
+        }, 400
 
     latex = object_parser.parse(detections)
 

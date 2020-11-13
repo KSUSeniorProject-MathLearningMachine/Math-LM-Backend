@@ -254,8 +254,7 @@ def image_segmentation(pil_img):
 		for y in range(len(upperlines)):
 			lines.append((upperlines[y], lowerlines[y]))
 	else:
-		print("Too much noise in image, unable to process.\nPlease try with another image. Ctrl-C to exit:- ")
-		return
+		return "Error: Too much noise"
 	
 	lines = np.array(lines)
 	no_of_lines = len(lines)

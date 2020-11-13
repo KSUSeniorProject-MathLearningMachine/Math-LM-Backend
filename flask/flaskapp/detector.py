@@ -23,8 +23,10 @@ def detect(b64_image):
     img = readb64(b64_image)
 
     # segment images
-    cs.image_segmentation(img)
-    return ("Hello", 1)
+    attempt = cs.image_segmentation(img)
+
+    if attempt[0] == 'E':
+        return (attempt)
 
     # load segmented images. TODO: make this less janky by keeping images in memory instead of filesystem
     segmented_images = []
