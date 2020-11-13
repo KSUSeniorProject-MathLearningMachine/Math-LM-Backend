@@ -271,7 +271,7 @@ def image_segmentation(pil_img):
 		lines_img.append(bin_img[lines[i][0]:lines[i][1], :])
 
 	# -------------/Line Detection-----------------#
-
+	return
 	# -------------Letter Width Calculation--------#
 
 	contours, hierarchy = cv2.findContours(contr_retrival, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -281,7 +281,7 @@ def image_segmentation(pil_img):
 	print("\nAverage Width of Each Letter:- ", mean_lttr_width)
 
 	# -------------/Letter Width Calculation-------#
-	return
+	
 	# --------------Word Detection-----------------#
 	x_lines = []
 
