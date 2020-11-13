@@ -241,7 +241,7 @@ def image_segmentation(pil_img):
 		for x in range(width):
 			if bin_img[y][x] == PIXEL_SET:
 				count_x[y] += 1
-	return
+	
 	upper_lines, lower_lines = line_array(count_x)
 	upperlines, lowerlines = refine_array(upper_lines, lower_lines)
 
@@ -261,7 +261,7 @@ def image_segmentation(pil_img):
 			if k & 0xFF == ord('q'):
 				cv2.destroyAllWindows()
 				exit()
-
+	
 	lines = np.array(lines)
 	no_of_lines = len(lines)
 	print("\nGiven Text has   # ", no_of_lines, " #   no. of lines")
@@ -281,7 +281,7 @@ def image_segmentation(pil_img):
 	print("\nAverage Width of Each Letter:- ", mean_lttr_width)
 
 	# -------------/Letter Width Calculation-------#
-
+	return
 	# --------------Word Detection-----------------#
 	x_lines = []
 
