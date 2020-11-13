@@ -26,7 +26,7 @@ def detect(b64_image):
     attempt = cs.image_segmentation(img)
 
     if attempt[0] == 'E':
-        return (attempt)
+        return (attempt, 0)
 
     # load segmented images. TODO: make this less janky by keeping images in memory instead of filesystem
     segmented_images = []
