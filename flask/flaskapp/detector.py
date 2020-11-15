@@ -1,5 +1,4 @@
 import base64
-from PIL import Image
 from io import BytesIO
 import numpy as np
 from tensorflow.keras.models import load_model
@@ -15,26 +14,80 @@ from tensorflow.keras.applications.resnet import preprocess_input
 from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.applications import imagenet_utils
 from imutils.object_detection import non_max_suppression
-import numpy as np
 import argparse
 import imutils
 import time
 import cv2
+import keras.models
+# from scipy.misc import imread, imresize,imshow
+import tensorflow as tf
+from keras.models import Sequential
+from keras.layers.normalization import BatchNormalization
+from keras.layers.convolutional import Conv2D
+from keras.layers.convolutional import MaxPooling2D
+from keras.layers.core import Activation
+from keras.layers.core import Flatten
+from keras.layers.core import Dropout
+from keras.layers.core import Dense
+from keras import backend as K
+from keras.optimizers import Adam
 
-import sys
-import os
-
-sys.path.append(os.path.abspath('./flask/flaskapp/model'))
-from load import init
-
-global model, graph
-model, graph = init()
 
 WIDTH = 600
 PYR_SCALE = 1.2
 WIN_STEP = 16
 ROI_SIZE = (200, 200)
 INPUT_SIZE = (45, 45)
+MIN_CONF = 0.98
+VISUALIZE = 0
+
+
+def init_model():
+    classes = 82
+    LR = 1e-3
+    EPOCHS = 12
+    img_rows, img_cols = 45, 45
+    input_shape = (img_rows, img_cols, 3)
+
+    graph = tf.Graph()
+
+    with graph.as_default():
+
+        model = Sequential()
+
+        model.add(Conv2D(32, (2, 2), input_shape = input_shape))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size =(2, 2)))
+
+        model.add(Conv2D(32, (2, 2)))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size =(2, 2)))
+
+        model.add(Conv2D(64, (2, 2)))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size =(2, 2)))
+
+        model.add(Flatten())
+        model.add(Dense(64))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(classes))
+        model.add(Activation('softmax'))
+
+        #load woeights into new model
+        model.load_weights("weights.h5")
+        print("Loaded Model from disk")
+
+        #compile and evaluate loaded model
+        opt = Adam(lr=LR, decay=LR / EPOCHS)
+
+        model.compile(loss='categorical_crossentropy',
+                      optimizer=opt,
+                      metrics=['accuracy'])
+        #print('loss:', loss)
+        #print('accuracy:', accuracy)
+
+        return model, graph
 
 
 def sliding_window(image, step, ws):
@@ -110,7 +163,7 @@ def detect(image_array):
 
             # check to see if we are visualizing each of the sliding
             # windows in the image pyramid
-            if args["visualize"] > 0:
+            if VISUALIZE > 0:
                 # clone the original image and then draw a bounding box
                 # surrounding the current region
                 clone = image_array.copy()
@@ -136,9 +189,11 @@ def detect(image_array):
     print("[INFO] classifying ROIs...")
     start = time.time()
 
+    model, graph = init_model()
+
     preds = []
     for (roi) in rois:
-        preds.append(classify(roi))
+        preds.append(classify(roi, model, graph))
 
     # preds = np.array(preds, dtype="float32")
 
@@ -159,7 +214,7 @@ def detect(image_array):
 
         # filter out weak detections by ensuring the predicted probability
         # is greater than the minimum probability
-        if prob >= args["min_conf"]:
+        if prob >= MIN_CONF:
             # grab the bounding box associated with the prediction and
             # convert the coordinates
             box = locs[i]
@@ -169,6 +224,9 @@ def detect(image_array):
             L = labels.get(label, [])
             L.append((box, prob))
             labels[label] = L
+
+    labels_with_prob = []
+    overall_confidence = 0.0
 
     # loop over the labels for each of detected objects in the image
     for label in labels.keys():
@@ -186,7 +244,9 @@ def detect(image_array):
         # show the results *before* applying non-maxima suppression, then
         # clone the image again so we can display the results *after*
         # applying non-maxima suppression
-        cv2.imshow("Before", clone)
+        if VISUALIZE > 0:
+            cv2.imshow("Before", clone)
+
         clone = image_array.copy()
 
         # extract the bounding boxes and associated prediction
@@ -205,12 +265,24 @@ def detect(image_array):
             cv2.putText(clone, label, (startX, y),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2)
 
+            labels_with_prob.append((label, (startX, startY), (endX, endY), proba[0]))
+            overall_confidence += proba[0]
+
         # show the output after apply non-maxima suppression
-        cv2.imshow("After", clone)
-        cv2.waitKey(0)
+        if VISUALIZE > 0:
+            cv2.imshow("After", clone)
+            cv2.waitKey(0)
+
+    try:
+        overall_confidence /= len(labels_with_prob)
+    except ZeroDivisionError:
+        overall_confidence = 0.0
+
+    return labels_with_prob, overall_confidence
 
 
-def classify(image_array):
+def classify(image_array, model, graph):
+
     mlb = pickle.loads(open('mlb.pickle', 'rb').read())
     
     image_array = image_array.astype("float") / 255.0
@@ -219,12 +291,12 @@ def classify(image_array):
 
     with graph.as_default():
         out = model.predict(image_array)[0]
-        print(out)
-        print()
         prediction_index = out.argmax(axis=-1)
         prediction = ' '.join(mlb.classes_[prediction_index])
         confidence = out[prediction_index]
-        print(prediction)
+
+        if VISUALIZE > 0:
+            print(prediction)
 
         return prediction_index, prediction, confidence
 
@@ -237,10 +309,10 @@ if __name__ == '__main__':
                     help="path to the input image")
     # ap.add_argument("-s", "--size", type=str, default="(200, 150)",
     #                 help="ROI size (in pixels)")
-    ap.add_argument("-c", "--min-conf", type=float, default=0.9,
-                    help="minimum probability to filter weak detections")
-    ap.add_argument("-v", "--visualize", type=int, default=-1,
-                    help="whether or not to show extra visualizations for debugging")
+    # ap.add_argument("-c", "--min-conf", type=float, default=0.9,
+    #                 help="minimum probability to filter weak detections")
+    # ap.add_argument("-v", "--visualize", type=int, default=-1,
+    #                 help="whether or not to show extra visualizations for debugging")
     args = vars(ap.parse_args())
 
     image = cv2.imread(args["image"])
@@ -249,6 +321,6 @@ if __name__ == '__main__':
     # image = img_to_array(image)
     # image = np.expand_dims(image, axis=0)
 
-    print(detect(image))
+    detect(image)
 
 
