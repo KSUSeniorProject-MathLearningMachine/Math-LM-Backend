@@ -226,7 +226,7 @@ def detect(image_array):
             labels[label] = L
 
     labels_with_prob = []
-    overall_confidence = 0.0
+    overall_confidence = 1.0
 
     # loop over the labels for each of detected objects in the image
     for label in labels.keys():
@@ -266,17 +266,12 @@ def detect(image_array):
                         cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2)
 
             labels_with_prob.append((label, (startX, startY), (endX, endY), proba[0]))
-            overall_confidence += proba[0]
+            overall_confidence *= proba[0]
 
         # show the output after apply non-maxima suppression
         if VISUALIZE > 0:
             cv2.imshow("After", clone)
             cv2.waitKey(0)
-
-    try:
-        overall_confidence /= len(labels_with_prob)
-    except ZeroDivisionError:
-        overall_confidence = 0.0
 
     return labels_with_prob, overall_confidence
 
