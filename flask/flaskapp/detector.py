@@ -243,6 +243,8 @@ def detect(image_array):
                 cv2.imshow("ROI", roiOrig)
                 cv2.waitKey(0)
 
+    cv2.destroyAllWindows()
+
     # show how long it took to loop over the image pyramid layers and
     # sliding window locations
     end = time.time()
@@ -340,6 +342,8 @@ def detect(image_array):
         if VISUALIZE > 0:
             cv2.imshow("After", clone)
             cv2.waitKey(0)
+
+    cv2.destroyAllWindows()
 
     clone = image_array.copy()
 
