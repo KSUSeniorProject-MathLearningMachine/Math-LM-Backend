@@ -403,7 +403,7 @@ def detect(image_array):
 
 
 def classify(image_array, model, graph):
-    mlb = pickle.loads(open('grants.pickle', 'rb').read())
+    mlb = pickle.loads(open('mlb.pickle', 'rb').read())
 
     image_array = image_array.astype("float") / 255.0
     image_array = img_to_array(image_array)
