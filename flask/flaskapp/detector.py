@@ -52,20 +52,19 @@ def init_model():
     graph = tf.Graph()
 
     with graph.as_default():
-
         model = Sequential()
 
-        model.add(Conv2D(32, (2, 2), input_shape = input_shape))
+        model.add(Conv2D(32, (2, 2), input_shape=input_shape))
         model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size =(2, 2)))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
 
         model.add(Conv2D(32, (2, 2)))
         model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size =(2, 2)))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
 
         model.add(Conv2D(64, (2, 2)))
         model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size =(2, 2)))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
 
         model.add(Flatten())
         model.add(Dense(64))
@@ -74,18 +73,18 @@ def init_model():
         model.add(Dense(classes))
         model.add(Activation('softmax'))
 
-        #load woeights into new model
+        # load woeights into new model
         model.load_weights("weights.h5")
         print("Loaded Model from disk")
 
-        #compile and evaluate loaded model
+        # compile and evaluate loaded model
         opt = Adam(lr=LR, decay=LR / EPOCHS)
 
         model.compile(loss='categorical_crossentropy',
                       optimizer=opt,
                       metrics=['accuracy'])
-        #print('loss:', loss)
-        #print('accuracy:', accuracy)
+        # print('loss:', loss)
+        # print('accuracy:', accuracy)
 
         return model, graph
 
@@ -118,7 +117,6 @@ def image_pyramid(image, scale=0.5, minSize=(224, 224)):
 
 
 def detect(image_array):
-
     image_array = imutils.resize(image_array, width=WIDTH)
     (H, W) = image_array.shape[:2]
 
@@ -265,8 +263,8 @@ def detect(image_array):
             cv2.putText(clone, label, (startX, y),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2)
 
-            labels_with_prob.append((label, (startX, startY), (endX, endY), proba[0]))
-            overall_confidence *= proba[0]
+            # labels_with_prob.append((label, (startX, startY), (endX, endY), proba[0]))
+            # overall_confidence *= proba[0]
 
         # show the output after apply non-maxima suppression
         if VISUALIZE > 0:
@@ -277,9 +275,8 @@ def detect(image_array):
 
 
 def classify(image_array, model, graph):
-
     mlb = pickle.loads(open('mlb.pickle', 'rb').read())
-    
+
     image_array = image_array.astype("float") / 255.0
     image_array = img_to_array(image_array)
     image_array = np.expand_dims(image_array, axis=0)
@@ -317,5 +314,3 @@ if __name__ == '__main__':
     # image = np.expand_dims(image, axis=0)
 
     detect(image)
-
-
