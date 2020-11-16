@@ -31,7 +31,7 @@ from keras.layers.core import Dropout
 from keras.layers.core import Dense
 from keras import backend as K
 from keras.optimizers import Adam
-
+import os
 
 WIDTH = 600
 PYR_SCALE = 1.2
@@ -40,6 +40,11 @@ ROI_SIZE = (200, 200)
 INPUT_SIZE = (45, 45)
 MIN_CONF = 0.98
 VISUALIZE = 0
+
+try:
+    VISUALIZE = os.environ['VISUALIZE']
+except KeyError:
+    VISUALIZE = 0
 
 
 def init_model():
@@ -426,14 +431,18 @@ if __name__ == '__main__':
     #                 help="ROI size (in pixels)")
     # ap.add_argument("-c", "--min-conf", type=float, default=0.9,
     #                 help="minimum probability to filter weak detections")
-    # ap.add_argument("-v", "--visualize", type=int, default=-1,
-    #                 help="whether or not to show extra visualizations for debugging")
+    ap.add_argument("-v", "--visualize", type=int, default=0,
+                    help="whether or not to show extra visualizations for debugging")
     args = vars(ap.parse_args())
 
     image = cv2.imread(args["image"])
-    # image = cv2.resize(image, (45, 45))
-    # image = image.astype("float") / 255.0
-    # image = img_to_array(image)
-    # image = np.expand_dims(image, axis=0)
+
+    if image is None:
+        raise Exception('File not found')
+
+    try:
+        VISUALIZE = args['visualize'] or os.environ['VISUALIZE']
+    except KeyError:
+        VISUALIZE = 0
 
     detect(image)
