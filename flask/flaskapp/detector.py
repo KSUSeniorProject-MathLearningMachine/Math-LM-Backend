@@ -116,6 +116,76 @@ def image_pyramid(image, scale=0.5, minSize=(224, 224)):
         yield image
 
 
+def non_max_suppression_with_labels(boxes, labels, probs=None, overlapThresh=0.3):
+    # if there are no boxes, return an empty list
+    if len(boxes) == 0:
+        return []
+
+    # if the bounding boxes are integers, convert them to floats -- this
+    # is important since we'll be doing a bunch of divisions
+    if boxes.dtype.kind == "i":
+        boxes = boxes.astype("float")
+
+    # initialize the list of picked indexes
+    pick = []
+
+    # grab the coordinates of the bounding boxes
+    x1 = boxes[:, 0]
+    y1 = boxes[:, 1]
+    x2 = boxes[:, 2]
+    y2 = boxes[:, 3]
+
+    # compute the area of the bounding boxes and grab the indexes to sort
+    # (in the case that no probabilities are provided, simply sort on the
+    # bottom-left y-coordinate)
+    area = (x2 - x1 + 1) * (y2 - y1 + 1)
+    idxs = y2
+
+    # if probabilities are provided, sort on them instead
+    if probs is not None:
+        idxs = probs
+
+    # sort the indexes
+    idxs = np.argsort(idxs)
+
+    # keep looping while some indexes still remain in the indexes list
+    while len(idxs) > 0:
+        # grab the last index in the indexes list and add the index value
+        # to the list of picked indexes
+        last = len(idxs) - 1
+        i = idxs[last]
+        pick.append(i)
+
+        # find the largest (x, y) coordinates for the start of the bounding
+        # box and the smallest (x, y) coordinates for the end of the bounding
+        # box
+        xx1 = np.maximum(x1[i], x1[idxs[:last]])
+        yy1 = np.maximum(y1[i], y1[idxs[:last]])
+        xx2 = np.minimum(x2[i], x2[idxs[:last]])
+        yy2 = np.minimum(y2[i], y2[idxs[:last]])
+
+        # compute the width and height of the bounding box
+        w = np.maximum(0, xx2 - xx1 + 1)
+        h = np.maximum(0, yy2 - yy1 + 1)
+
+        # compute the ratio of overlap
+        overlap = (w * h) / area[idxs[:last]]
+
+        # delete all indexes from the index list that have overlap greater
+        # than the provided overlap threshold
+        idxs = np.delete(idxs, np.concatenate(([last],
+            np.where(overlap > overlapThresh)[0])))
+
+    boxes_with_labels = []
+
+    for picked in pick:
+        boxes_with_labels.append((boxes[picked].astype("int"), labels[picked]))
+
+
+    # return only the bounding boxes that were picked
+    return boxes_with_labels
+
+
 def detect(image_array):
     image_array = imutils.resize(image_array, width=WIDTH)
     (H, W) = image_array.shape[:2]
@@ -270,6 +340,55 @@ def detect(image_array):
         if VISUALIZE > 0:
             cv2.imshow("After", clone)
             cv2.waitKey(0)
+
+    clone = image_array.copy()
+
+    all_boxes = []
+
+    for label in labels:
+        for (box, prob) in labels[label]:
+            all_boxes.append((box, prob, label))
+
+    # loop over all bounding boxes for the current label
+    for (box, prob, label) in all_boxes:
+        # draw the bounding box on the image
+        (startX, startY, endX, endY) = box
+        cv2.rectangle(clone, (startX, startY), (endX, endY),
+                      (0, 255, 0), 2)
+
+    # show the results *before* applying non-maxima suppression, then
+    # clone the image again so we can display the results *after*
+    # applying non-maxima suppression
+    if VISUALIZE > 0:
+        cv2.imshow("Before (all labels)", clone)
+
+    clone = image_array.copy()
+
+    boxes = np.array([p[0] for p in all_boxes])
+    proba = np.array([p[1] for p in all_boxes])
+    labels = np.array([p[2] for p in all_boxes])
+
+    boxes = non_max_suppression_with_labels(boxes, labels, proba)
+
+    # loop over all bounding boxes that were kept after applying
+    # non-maxima suppression
+    for ((startX, startY, endX, endY), label) in boxes:
+
+        # draw the bounding box and label on the image
+        cv2.rectangle(clone, (startX, startY), (endX, endY),
+                      (0, 255, 0), 2)
+        y = startY - 10 if startY - 10 > 10 else startY + 10
+        cv2.putText(clone, label, (startX, y),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2)
+
+        labels_with_prob.append((label, (startX, startY), (endX, endY), proba[0]))
+        overall_confidence *= proba[0]
+
+    # show the output after apply non-maxima suppression
+    if VISUALIZE > 0:
+        cv2.imshow("After (all labels)", clone)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
     return labels_with_prob, overall_confidence
 
