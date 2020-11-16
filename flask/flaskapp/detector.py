@@ -441,7 +441,7 @@ if __name__ == '__main__':
         raise Exception('File not found')
 
     try:
-        VISUALIZE = args['visualize'] or os.environ['VISUALIZE']
+        VISUALIZE = int(args['visualize'] or os.environ['VISUALIZE'])
     except KeyError:
         VISUALIZE = 0
 
