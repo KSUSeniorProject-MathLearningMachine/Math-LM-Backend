@@ -42,7 +42,7 @@ MIN_CONF = 0.98
 VISUALIZE = 0
 
 try:
-    VISUALIZE = os.environ['VISUALIZE']
+    VISUALIZE = int(os.environ['VISUALIZE'])
 except KeyError:
     VISUALIZE = 0
 
