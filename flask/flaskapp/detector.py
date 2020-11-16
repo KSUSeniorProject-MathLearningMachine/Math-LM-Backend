@@ -231,7 +231,7 @@ def detect(image_array):
 
             # check to see if we are visualizing each of the sliding
             # windows in the image pyramid
-            if VISUALIZE > 0:
+            if VISUALIZE > 1:
                 # clone the original image and then draw a bounding box
                 # surrounding the current region
                 clone = image_array.copy()
