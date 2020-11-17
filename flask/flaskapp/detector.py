@@ -36,7 +36,7 @@ import os
 WIDTH = 600
 PYR_SCALE = 1.2
 WIN_STEP = 16
-ROI_SIZE = (200, 200)
+ROI_SIZE = (100, 100)
 INPUT_SIZE = (45, 45)
 MIN_CONF = 0.98
 VISUALIZE = 0
@@ -412,7 +412,7 @@ def classify(image_array, model, graph):
     with graph.as_default():
         out = model.predict(image_array)[0]
         prediction_index = out.argmax(axis=-1)
-        prediction = ' '.join(mlb.classes_[prediction_index])
+        prediction = ''.join(mlb.classes_[prediction_index])
         confidence = out[prediction_index]
 
         if VISUALIZE > 0:
