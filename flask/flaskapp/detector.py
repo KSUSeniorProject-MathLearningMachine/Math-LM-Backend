@@ -32,6 +32,10 @@ from keras.layers.core import Dense
 from keras import backend as K
 from keras.optimizers import Adam
 import os
+import random
+
+DARK_THRESH = 100
+VISUALIZATION_COLOR = (0, 255, 0)
 
 VISUALIZE = 0
 
@@ -61,6 +65,28 @@ def classify(image, model):
     return
 
 
+def are_pixels_nearby(pixel, other_pixel, max_distance=2 ** (1 / 2)):
+    delta_x = other_pixel[0] - pixel[0]
+    delta_y = other_pixel[1] - pixel[1]
+    return (delta_x ** 2 + delta_y ** 2) ** (1 / 2) <= max_distance
+
+
+def group_pixel(ungrouped_pixel, grouped_dark_pixels, max_distance=None):
+    for group_index, grouped_pixel_group in enumerate(grouped_dark_pixels):
+        for grouped_pixel in grouped_pixel_group:
+            if are_pixels_nearby(ungrouped_pixel, grouped_pixel, max_distance):
+                grouped_pixel_group.append(ungrouped_pixel)
+                return group_index
+
+    new_pixel_group = [ungrouped_pixel]
+    grouped_dark_pixels.append(new_pixel_group)
+
+
+def visualization_color(index):
+    random.seed(index)
+    return random.randint(50, 200), random.randint(50, 200), random.randint(50, 200)
+
+
 def detect(image, model):
     # 1. Place each dark pixel in an ungrouped list
     # 2. Create a new list with grouped pixels and add the first one to the first group,
@@ -74,6 +100,28 @@ def detect(image, model):
     # 5. In the case that there are multiple detections close by, combine them into one
     #    "image" and send that off to the classifier. If that is greater than a minimum
     #    confidence, replace those detections with the new combined one.
+
+    ungrouped_dark_pixels = []
+
+    for xPos, y in enumerate(image):
+        for yPos, (r, g, b) in enumerate(y):
+            if (int(r) + int(g) + int(b)) / 3 < DARK_THRESH:
+                ungrouped_dark_pixels.append((xPos, yPos))
+
+    grouped_dark_pixels = []
+
+    clone = image.copy()
+
+    for ungrouped_pixel in ungrouped_dark_pixels:
+        # For each ungrouped dark pixel, we see if it can be added to a group,
+        # otherwise, create a new group for it.
+        group_index = group_pixel(ungrouped_pixel, grouped_dark_pixels, 10)
+        cv2.rectangle(clone, ungrouped_pixel[::-1], ungrouped_pixel[::-1], visualization_color(group_index), 1)
+
+    cv2.imshow("After grouping", clone)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
     return
 
 
