@@ -1,41 +1,16 @@
-import base64
-from io import BytesIO
 import numpy as np
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.image import img_to_array
-import cv2
-# from ..flaskapp import CharacterSegmentation
-import os
 import argparse
-from pickle5 import pickle
-import imutils
-from tensorflow.keras.applications import ResNet50
-from tensorflow.keras.applications.resnet import preprocess_input
-from tensorflow.keras.preprocessing.image import img_to_array
-from tensorflow.keras.applications import imagenet_utils
-from imutils.object_detection import non_max_suppression
-import argparse
-import imutils
-import time
 import cv2
-import keras.models
-# from scipy.misc import imread, imresize,imshow
-import tensorflow as tf
-from keras.models import Sequential
-from keras.layers.normalization import BatchNormalization
-from keras.layers.convolutional import Conv2D
-from keras.layers.convolutional import MaxPooling2D
-from keras.layers.core import Activation
-from keras.layers.core import Flatten
-from keras.layers.core import Dropout
-from keras.layers.core import Dense
-from keras import backend as K
-from keras.optimizers import Adam
+from keras.models import load_model
 import os
 import random
+import skimage.morphology
 
-DARK_THRESH = 100
+DARK_THRESH = 120
 VISUALIZATION_COLOR = (0, 255, 0)
+BOUNDING_BOX_PADDING = 5
+INPUT_SIZE = (45, 45)
+MIN_CONF = 0.90
 
 VISUALIZE = 0
 
@@ -45,46 +20,37 @@ except KeyError:
     VISUALIZE = 0
 
 
-def init_model():
+def info(msg):
+    print("[INFO] {}".format(msg))
+
+
+def init_model(model_dir):
     """Return the loaded model from disk"""
-    return
-
-
-def find_nearby_pixels():
-    # TODO
-    return
-
-
-def group_strokes():
-    # TODO
-    return
+    return load_model(model_dir)
 
 
 def classify(image, model):
-    # TODO
-    return
+    model.predict(image)
 
-
-def are_pixels_nearby(pixel, other_pixel, max_distance=2 ** (1 / 2)):
-    delta_x = other_pixel[0] - pixel[0]
-    delta_y = other_pixel[1] - pixel[1]
-    return (delta_x ** 2 + delta_y ** 2) ** (1 / 2) <= max_distance
-
-
-def group_pixel(ungrouped_pixel, grouped_dark_pixels, max_distance=None):
-    for group_index, grouped_pixel_group in enumerate(grouped_dark_pixels):
-        for grouped_pixel in grouped_pixel_group:
-            if are_pixels_nearby(ungrouped_pixel, grouped_pixel, max_distance):
-                grouped_pixel_group.append(ungrouped_pixel)
-                return group_index
-
-    new_pixel_group = [ungrouped_pixel]
-    grouped_dark_pixels.append(new_pixel_group)
+    return 'a', 0.95
 
 
 def visualization_color(index):
     random.seed(index)
-    return random.randint(50, 200), random.randint(50, 200), random.randint(50, 200)
+    min = 100
+    max = 230
+    return random.randint(min, max), random.randint(min, max), random.randint(min, max)
+
+
+def bounding_box(image, number):
+    # Inspired by: https://stackoverflow.com/a/31402351
+    image = (image == number)
+    rows = np.any(image, axis=1)
+    cols = np.any(image, axis=0)
+    ymin, ymax = np.where(rows)[0][[0, -1]]
+    xmin, xmax = np.where(cols)[0][[0, -1]]
+
+    return (xmin, ymin), (xmax, ymax)
 
 
 def detect(image, model):
@@ -101,34 +67,81 @@ def detect(image, model):
     #    "image" and send that off to the classifier. If that is greater than a minimum
     #    confidence, replace those detections with the new combined one.
 
-    ungrouped_dark_pixels = []
+    image_map = np.zeros((image.shape[0], image.shape[1]), dtype=bool)
 
+    # convert image to scikit-image
     for xPos, y in enumerate(image):
         for yPos, (r, g, b) in enumerate(y):
-            if (int(r) + int(g) + int(b)) / 3 < DARK_THRESH:
-                ungrouped_dark_pixels.append((xPos, yPos))
+            image_map[xPos][yPos] = (int(r) + int(g) + int(b)) / 3 < DARK_THRESH
 
-    grouped_dark_pixels = []
+    grouped_image, num_groups = skimage.morphology.label(image_map, return_num=True, connectivity=2)
 
-    clone = image.copy()
+    if VISUALIZE > 0:
+        # Show the labelled groupings
+        clone = image.copy()
 
-    for ungrouped_pixel in ungrouped_dark_pixels:
-        # For each ungrouped dark pixel, we see if it can be added to a group,
-        # otherwise, create a new group for it.
-        group_index = group_pixel(ungrouped_pixel, grouped_dark_pixels, 10)
-        cv2.rectangle(clone, ungrouped_pixel[::-1], ungrouped_pixel[::-1], visualization_color(group_index), 1)
+        for yPos, y in enumerate(grouped_image):
+            for xPos, label in enumerate(y):
+                if label > 0:
+                    cv2.rectangle(clone, (xPos, yPos), (xPos, yPos), visualization_color(label), 1)
 
-    cv2.imshow("After grouping", clone)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+        cv2.imshow("After grouping", clone)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
-    return
+    if VISUALIZE > 0:
+        clone = image.copy()
+
+        for group_number in range(1, num_groups + 1):
+            start, end = bounding_box(grouped_image, group_number)
+            cv2.rectangle(clone, tuple(i - BOUNDING_BOX_PADDING for i in start), tuple(i + BOUNDING_BOX_PADDING for i in end), VISUALIZATION_COLOR, 2)
+
+        cv2.imshow("Bounding boxes", clone)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+    detections = []
+
+    for group_number in range(1, num_groups + 1):
+        top_left, bottom_right = bounding_box(grouped_image, group_number)
+
+        grouped_image_clone = (grouped_image == group_number)
+        cropped = grouped_image_clone[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
+
+        smallest_dim = np.argmin(cropped.shape)
+        sm_dim_size = cropped.shape[smallest_dim]
+        lg_dim_size = np.max(cropped.shape)
+
+        dim_diff = lg_dim_size - sm_dim_size
+
+        if smallest_dim == 0:
+            padding = np.zeros((int(dim_diff / 2.0), lg_dim_size))
+        else:
+            padding = np.zeros((lg_dim_size, int(dim_diff / 2.0)))
+
+        cropped = np.concatenate((padding, cropped, padding), axis=smallest_dim)
+        cropped = cv2.resize(cropped, INPUT_SIZE, interpolation=cv2.INTER_AREA)
+
+        if VISUALIZE > 0:
+            cv2.imshow("Cropped image", (255.0 - cropped.astype(float) * 255.0))
+            cv2.waitKey(0)
+
+        detection, confidence = classify(cropped, model)
+
+        if confidence > MIN_CONF:
+            detections.append((group_number, detection, confidence))
+
+    VISUALIZE > 0 and cv2.destroyAllWindows()
+
+    # TODO: test close by groups
+
+    return detections
 
 
-if __name__ == '__main__':
-    """If the script is run from the command line..."""
-
+def init_from_cmd():
     ap = argparse.ArgumentParser()
+    ap.add_argument("-m", "--model", required=True,
+                    help="path to saved model")
     ap.add_argument("-i", "--image", required=True,
                     help="path to the input image")
     ap.add_argument("-v", "--visualize", type=int, default=0,
@@ -138,15 +151,27 @@ if __name__ == '__main__':
     image = cv2.imread(args["image"])
 
     if image is None:
-        raise Exception('File not found')
+        raise FileNotFoundError("Cannot load image: {}".format(args["image"]))
+
+    global VISUALIZE
 
     try:
         VISUALIZE = int(args['visualize'] or os.environ['VISUALIZE'])
     except KeyError:
         VISUALIZE = 0
 
+    info("Visualization level: {:d}".format(VISUALIZE))
+
     # TODO: Apply filters, if necessary (monochrome)
 
-    model = init_model()
+    model = init_model(args["model"])
 
-    detect(image, model)
+    detections = detect(image, model)
+
+    print(detections)
+
+
+if __name__ == '__main__':
+    """If the script is run from the command line..."""
+    init_from_cmd()
+
