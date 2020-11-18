@@ -9,7 +9,7 @@ import skimage.morphology
 DARK_THRESH = 120
 VISUALIZATION_COLOR = (0, 255, 0)
 BOUNDING_BOX_PADDING = 5
-INPUT_SIZE = (45, 45)
+INPUT_SIZE = (64, 64)
 MIN_CONF = 0.90
 
 VISUALIZE = 0
@@ -29,10 +29,25 @@ def init_model(model_dir):
     return load_model(model_dir)
 
 
-def classify(image, model):
-    model.predict(image)
+def init_labels(labels_file):
+    f = open(labels_file, 'rb')
+    lines = f.readlines()
+    f.close()
+    return [str(w).replace("\n", "") for w in lines]
 
-    return 'a', 0.95
+
+def classify(image, model, labels):
+    # img = cv2.cvtColor(img.astype('float32'), cv2.COLOR_GRAY2BGR)
+
+    out = model.predict(image)
+
+    prediction_index = out.argmax(axis=-1)[0]
+    prediction = labels[prediction_index]
+    confidence = out[0][prediction_index]
+
+    info("Classification: {}, confidence: {}".format(prediction, confidence))
+
+    return prediction, confidence
 
 
 def visualization_color(index):
@@ -53,7 +68,7 @@ def bounding_box(image, number):
     return (xmin, ymin), (xmax, ymax)
 
 
-def detect(image, model):
+def detect(image, model, labels):
     # 1. Place each dark pixel in an ungrouped list
     # 2. Create a new list with grouped pixels and add the first one to the first group,
     #    then add the second one to either the first or second group if it is touching
@@ -122,11 +137,16 @@ def detect(image, model):
         cropped = np.concatenate((padding, cropped, padding), axis=smallest_dim)
         cropped = cv2.resize(cropped, INPUT_SIZE, interpolation=cv2.INTER_AREA)
 
+        img = (255.0 - cropped * 255.0)
+
         if VISUALIZE > 0:
-            cv2.imshow("Cropped image", (255.0 - cropped.astype(float) * 255.0))
+            cv2.imshow("Cropped image", img)
             cv2.waitKey(0)
 
-        detection, confidence = classify(cropped, model)
+        img = np.expand_dims(img, axis=2)
+        img = np.expand_dims(img, axis=0)
+
+        detection, confidence = classify(img, model, labels)
 
         if confidence > MIN_CONF:
             detections.append((group_number, detection, confidence))
@@ -142,6 +162,8 @@ def init_from_cmd():
     ap = argparse.ArgumentParser()
     ap.add_argument("-m", "--model", required=True,
                     help="path to saved model")
+    ap.add_argument("-l", "--labels", required=True,
+                    help="path to saved labels")
     ap.add_argument("-i", "--image", required=True,
                     help="path to the input image")
     ap.add_argument("-v", "--visualize", type=int, default=0,
@@ -165,8 +187,9 @@ def init_from_cmd():
     # TODO: Apply filters, if necessary (monochrome)
 
     model = init_model(args["model"])
+    labels = init_labels(args["labels"])
 
-    detections = detect(image, model)
+    detections = detect(image, model, labels)
 
     print(detections)
 
