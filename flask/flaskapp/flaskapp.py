@@ -7,10 +7,14 @@ import cv2
 import numpy as np
 import base64
 from flask_cors import CORS, cross_origin
+import os
 
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+
+MODEL = detector.init_model(os.environ['MODEL'])
+LABELS = detector.init_labels(os.environ['LABELS'])
 
 
 @app.route('/')
@@ -30,7 +34,7 @@ def ocr():
     im_arr = np.frombuffer(im_bytes, dtype=np.uint8)  # im_arr is one-dim Numpy array
     img = cv2.imdecode(im_arr, flags=cv2.IMREAD_COLOR)
 
-    detections, confidence = detector.detect(img)
+    detections, confidence = detector.detect(img, MODEL, LABELS)
 
     latex = object_parser.parse(detections)
 
@@ -82,7 +86,7 @@ def solve_image():
     im_arr = np.frombuffer(im_bytes, dtype=np.uint8)  # im_arr is one-dim Numpy array
     img = cv2.imdecode(im_arr, flags=cv2.IMREAD_COLOR)
 
-    detections, overall_confidence = detector.detect(img)
+    detections, overall_confidence = detector.detect(img, MODEL, LABELS)
     latex = object_parser.parse(detections)
 
     data = {

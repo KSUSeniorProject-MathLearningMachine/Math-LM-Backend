@@ -9,8 +9,8 @@ import skimage.morphology
 DARK_THRESH = 120
 VISUALIZATION_COLOR = (0, 255, 0)
 BOUNDING_BOX_PADDING = 5
-INPUT_SIZE = (64, 64)
-MIN_CONF = 0.90
+INPUT_SIZE = (32, 32)
+MIN_CONF = 0.50
 
 VISUALIZE = 0
 
@@ -30,10 +30,7 @@ def init_model(model_dir):
 
 
 def init_labels(labels_file):
-    f = open(labels_file, 'rb')
-    lines = f.readlines()
-    f.close()
-    return [str(w).replace("\n", "") for w in lines]
+    return np.load(labels_file)
 
 
 def classify(image, model, labels):
@@ -116,9 +113,10 @@ def detect(image, model, labels):
         cv2.destroyAllWindows()
 
     detections = []
+    overall_confidence = 1.0
 
     for group_number in range(1, num_groups + 1):
-        top_left, bottom_right = bounding_box(grouped_image, group_number)
+        box = top_left, bottom_right = bounding_box(grouped_image, group_number)
 
         grouped_image_clone = (grouped_image == group_number)
         cropped = grouped_image_clone[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
@@ -135,7 +133,7 @@ def detect(image, model, labels):
             padding = np.zeros((lg_dim_size, int(dim_diff / 2.0)))
 
         cropped = np.concatenate((padding, cropped, padding), axis=smallest_dim)
-        cropped = cv2.resize(cropped, INPUT_SIZE, interpolation=cv2.INTER_AREA)
+        cropped = cv2.resize(cropped, INPUT_SIZE)
 
         img = (255.0 - cropped * 255.0)
 
@@ -144,18 +142,21 @@ def detect(image, model, labels):
             cv2.waitKey(0)
 
         img = np.expand_dims(img, axis=2)
+        img = cv2.merge([img, img, img])
+
         img = np.expand_dims(img, axis=0)
 
         detection, confidence = classify(img, model, labels)
 
         if confidence > MIN_CONF:
-            detections.append((group_number, detection, confidence))
+            detections.append((box, detection, confidence))
+            overall_confidence *= confidence
 
     VISUALIZE > 0 and cv2.destroyAllWindows()
 
-    # TODO: test close by groups
+    # TODO: test close-by groups
 
-    return detections
+    return detections, overall_confidence
 
 
 def init_from_cmd():
@@ -189,9 +190,10 @@ def init_from_cmd():
     model = init_model(args["model"])
     labels = init_labels(args["labels"])
 
-    detections = detect(image, model, labels)
+    detections, overall_confidence = detect(image, model, labels)
 
     print(detections)
+    print(overall_confidence)
 
 
 if __name__ == '__main__':
