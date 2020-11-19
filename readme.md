@@ -62,8 +62,8 @@ To run the tests:
 **Response Body**:
 
     {
-        "confidence": (number) CONFIDENCE_VALUE_FROM_MATHPIX,
-        "input_detected": (str) "LATEX_STRING_OF_INPUT_DETECTED_FROM_MATHPIX",
+        "confidence": (number) CONFIDENCE_VALUE,
+        "input_detected": (str) "LATEX_STRING_OF_INPUT_DETECTED",
         "solved": (str) "LATEX_STRING_OF_CAS_SOLUTION_TO_PROBLEM"
     }
 
@@ -84,28 +84,3 @@ To run the tests:
     {
         "solved": (str) "LATEX_STRING_OF_CAS_SOLUTION_TO_PROBLEM"
     }
-
-### Mathpix OCR
-
-**URI**: `/mathpix-ocr`
-
-**Method**: POST
-
-**Request Body**:
-
-    {
-        "b64_img":(str)"BASEBASE64ENCODEDIMAGE"
-    }
-    
-**Response Body**:
-
-    {
-        "confidence":(number) CONFIDENCE_VALUE_FROM_MATPHIX,
-        "confidence_rate":(number) CONFIDENCE_RATE_FROM_MATHPIX,
-        "latex_styled":(str) "LATEX_STRING_OF_INPUT_DETECTED_FROM_MATHPIX",
-        "request_id":(str) Doesn't mean anything to us,
-        "text":(str) Doesnt mean much as we are using latex
-    }
-
-
-

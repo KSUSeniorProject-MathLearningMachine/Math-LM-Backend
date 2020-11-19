@@ -1,4 +1,3 @@
-import mathpix
 import latex_solver
 import detector
 import object_parser
@@ -38,37 +37,6 @@ def ocr():
         "confidence": confidence,
         "latex_styled": latex,
     }
-
-
-@app.route('/mathpix-ocr', methods=['POST'])
-@cross_origin()
-def mathpix_ocr():
-    img = request.get_json()['b64_img']
-
-    try:
-        return mathpix.submit_text(img)
-    except mathpix.MathpixApiException as e:
-        return e, 500
-
-
-@app.route('/solve-image-mathpix', methods=['POST'])
-@cross_origin()
-def solve_image_mathpix():
-    body = request.get_json()
-
-    try:
-        response = mathpix.submit_text(body['b64_img'])
-        latex_styled = response['latex_styled']
-
-        data = {
-            'solved': latex_solver.solve(latex_styled),
-            'input_detected': latex_solver.format_latex(latex_styled),
-            'confidence': response['confidence']
-        }
-
-        return data, 200
-    except mathpix.MathpixApiException as e:
-        return e, 500
 
 
 @app.route('/solve-image', methods=['POST'])
