@@ -1,9 +1,28 @@
 
 
+DICT={
+    's i n': '\\sin',
+    'c o s': '\\cos',
+    'l i m': '\\lim',
+    'l o g': '\\log',
+    't a n': '\\tan',
+}
+
+
+def label_to_latex(label):
+    try:
+        return DICT[label]
+    except KeyError:
+        return label
+
 
 def parse(detections):
     """Parse the detections and place them in order"""
+    latex = ''
 
-    # In the future, this will be more complex and will take into account pixel value locations
-    # and understand vertical differences between detections
-    return ''.join(detections)
+    detections.sort(key=lambda x: x[1][0]) # Sort by startX value
+
+    for (label, (startX, startY), (endX, endY), confidence) in detections:
+        latex += label_to_latex(label)
+
+    return latex
