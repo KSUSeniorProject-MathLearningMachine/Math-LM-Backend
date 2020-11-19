@@ -7,25 +7,6 @@ def test_home_page(client, app):
     assert b'Hello, World!' == res.data
 
 
-def test_mathpix_ocr(client, app):
-    with open('tests/imagetest.txt', 'r') as file:
-        image = file.read().replace('\n', '')
-
-    response_schema = {
-        "type": "object",
-        "properties": {
-            "confidence": {"type": "number"},
-            "latex_styled": {"type": "string"},
-            "request_id": {"type": "string"},
-        },
-    }
-    res = client.post('/mathpix-ocr', json={
-        'b64_img': image
-    })
-
-    assert True == validate_json(instance=res.get_json(), schema=response_schema)
-
-
 def test_solve_image(client, app):
     with open('tests/imagetest.txt', 'r') as file:
         image = file.read().replace('\n', '')

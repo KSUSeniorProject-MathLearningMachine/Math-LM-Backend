@@ -14,10 +14,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Update the environment files
-      run: |
-        echo "MATHPIX_APP_KEY=${{ secrets.MATHPIX_APP_KEY }}" >> mathpix-variables.env
-        echo "MATHPIX_APP_ID=${{ secrets.MATHPIX_APP_ID }}" >> mathpix-variables.env
     - name: Build the Docker image
       run: |
         docker-compose build
