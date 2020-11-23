@@ -37,6 +37,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # run the application on container start
 ENV FLASK_APP=flask/flaskapp/flaskapp.py
 ENV FLASK_ENV=development
+ENV MODEL=models/mathSymbolsPredictor.model
+ENV LABELS=models/mathSymbolsPredictor.npy
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 CMD flask run --host=0.0.0.0
