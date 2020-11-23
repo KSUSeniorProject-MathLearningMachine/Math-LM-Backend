@@ -133,6 +133,11 @@ def detect(image, model, labels):
             padding = np.zeros((lg_dim_size, int(dim_diff / 2.0)))
 
         cropped = np.concatenate((padding, cropped, padding), axis=smallest_dim)
+
+        if cropped.shape[0] < (INPUT_SIZE[0] / 2) or cropped.shape[1] < (INPUT_SIZE[1] / 2):
+            # This detection is too small
+            continue
+
         cropped = cv2.resize(cropped, INPUT_SIZE)
 
         img = (255.0 - cropped * 255.0)
