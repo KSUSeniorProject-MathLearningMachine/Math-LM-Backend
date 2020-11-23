@@ -64,7 +64,38 @@ To run the tests:
     {
         "confidence": (number) CONFIDENCE_VALUE,
         "input_detected": (str) "LATEX_STRING_OF_INPUT_DETECTED",
-        "solved": (str) "LATEX_STRING_OF_CAS_SOLUTION_TO_PROBLEM"
+        "solved": (str) "LATEX_STRING_OF_CAS_SOLUTION_TO_PROBLEM",
+        "detections": (object) ALL_DETECTED_OBJECTS_IN_THE_IMAGE,
+    }
+    
+**Example Response**
+
+    {
+      "confidence": 0.46090906455275005,
+      "detections": [
+        {
+          "box": {
+            "endX": "226",
+            "endY": "248",
+            "startX": "85",
+            "startY": "89"
+          },
+          "confidence": "0.7222325",
+          "label": "\\mathcal{F}"
+        },
+        {
+          "box": {
+            "endX": "315",
+            "endY": "263",
+            "startX": "263",
+            "startY": "80"
+          },
+          "confidence": "0.6381727",
+          "label": "\\pm"
+        }
+      ],
+      "input_detected": "\\mathcal{F}\\pm",
+      "solved": "F \\mathcal{math} pm "
     }
 
 ### Solve Latex
