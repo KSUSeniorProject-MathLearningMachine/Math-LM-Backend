@@ -9,8 +9,9 @@ import skimage.morphology
 DARK_THRESH = 120
 VISUALIZATION_COLOR = (0, 255, 0)
 BOUNDING_BOX_PADDING = 5
+RESIZE_WIDTH=800
 INPUT_SIZE = (32, 32)
-MIN_CONF = 0.50
+MIN_CONF = 0.90
 
 VISUALIZE = 0
 
@@ -65,6 +66,39 @@ def bounding_box(image, number):
     return (xmin, ymin), (xmax, ymax)
 
 
+def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
+    # https://stackoverflow.com/a/44659589
+    # initialize the dimensions of the image to be resized and
+    # grab the image size
+    dim = None
+    (h, w) = image.shape[:2]
+
+    # if both the width and height are None, then return the
+    # original image
+    if width is None and height is None:
+        return image
+
+    # check to see if the width is None
+    if width is None:
+        # calculate the ratio of the height and construct the
+        # dimensions
+        r = height / float(h)
+        dim = (int(w * r), height)
+
+    # otherwise, the height is None
+    else:
+        # calculate the ratio of the width and construct the
+        # dimensions
+        r = width / float(w)
+        dim = (width, int(h * r))
+
+    # resize the image
+    resized = cv2.resize(image, dim, interpolation = inter)
+
+    # return the resized image
+    return resized
+
+
 def detect(image, model, labels):
     # 1. Place each dark pixel in an ungrouped list
     # 2. Create a new list with grouped pixels and add the first one to the first group,
@@ -78,6 +112,8 @@ def detect(image, model, labels):
     # 5. In the case that there are multiple detections close by, combine them into one
     #    "image" and send that off to the classifier. If that is greater than a minimum
     #    confidence, replace those detections with the new combined one.
+
+    image = image_resize(image, width=RESIZE_WIDTH)
 
     image_map = np.zeros((image.shape[0], image.shape[1]), dtype=bool)
 
