@@ -10,7 +10,7 @@ DARK_THRESH = 120
 VISUALIZATION_COLOR = (0, 255, 0)
 BOUNDING_BOX_PADDING = 5
 RESIZE_WIDTH=800
-INPUT_SIZE = (32, 32)
+INPUT_SIZE = (28, 28)
 MIN_CONF = 0.90
 
 VISUALIZE = 0
@@ -113,7 +113,8 @@ def detect(image, model, labels):
     #    "image" and send that off to the classifier. If that is greater than a minimum
     #    confidence, replace those detections with the new combined one.
 
-    image = image_resize(image, width=RESIZE_WIDTH)
+    if image.shape[0] > RESIZE_WIDTH:
+        image = image_resize(image, width=RESIZE_WIDTH)
 
     image_map = np.zeros((image.shape[0], image.shape[1]), dtype=bool)
 
@@ -176,16 +177,18 @@ def detect(image, model, labels):
 
         cropped = cv2.resize(cropped, INPUT_SIZE)
 
-        img = (255.0 - cropped * 255.0)
+        # img = (255.0 - cropped * 255.0)
+        img = cropped
 
         if VISUALIZE > 0:
             cv2.imshow("Cropped image", img)
             cv2.waitKey(0)
 
-        img = np.expand_dims(img, axis=2)
-        img = cv2.merge([img, img, img])
+        # img = np.expand_dims(img, axis=2)
+        # img = cv2.merge([img, img, img])
 
         img = np.expand_dims(img, axis=0)
+        img = np.expand_dims(img, axis=-1)
 
         detection, confidence = classify(img, model, labels)
 
