@@ -11,7 +11,7 @@ VISUALIZATION_COLOR = (0, 255, 0)
 BOUNDING_BOX_PADDING = 5
 RESIZE_WIDTH=800
 INPUT_SIZE = (32, 32)
-MIN_CONF = 0.90
+MIN_CONF = 0.30
 
 VISUALIZE = 0
 
@@ -38,7 +38,8 @@ def classify(image, model, labels):
     #img = cv2.cvtColor(image.astype('float32'), cv2.COLOR_BGR2GRAY)
     
     #img = ~img
-    img = image / 255.0
+    # img = image / 255.0
+    img = image
 
 
     out = model.predict(img)
@@ -121,18 +122,22 @@ def detect(image, model, labels):
     if image.shape[0] > RESIZE_WIDTH:
         image = image_resize(image, width=RESIZE_WIDTH)
 
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image = cv2.GaussianBlur(image, (5, 5), 0)
+    _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+
     image_map = np.zeros((image.shape[0], image.shape[1]), dtype=bool)
 
-    # convert image to scikit-image
     for xPos, y in enumerate(image):
-        for yPos, (r, g, b) in enumerate(y):
-            image_map[xPos][yPos] = (int(r) + int(g) + int(b)) / 3 < DARK_THRESH
+        for yPos, pixel in enumerate(y):
+            image_map[xPos][yPos] = pixel < DARK_THRESH
 
     grouped_image, num_groups = skimage.morphology.label(image_map, return_num=True, connectivity=2)
 
     if VISUALIZE > 0:
         # Show the labelled groupings
         clone = image.copy()
+        clone = cv2.cvtColor(clone, cv2.COLOR_GRAY2RGB)
 
         for yPos, y in enumerate(grouped_image):
             for xPos, label in enumerate(y):
@@ -180,7 +185,7 @@ def detect(image, model, labels):
             # This detection is too small
             continue
 
-        cropped = cv2.resize(cropped, INPUT_SIZE)
+        cropped = cv2.resize(cropped, INPUT_SIZE, interpolation=cv2.INTER_AREA)
 
         # img = (255.0 - cropped * 255.0)
         img = cropped
