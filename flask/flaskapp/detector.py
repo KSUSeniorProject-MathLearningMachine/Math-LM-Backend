@@ -5,6 +5,13 @@ from keras.models import load_model
 import os
 import random
 import skimage.morphology
+from tensorflow.keras.models import load_model
+from imutils.contours import sort_contours
+import numpy as np
+import argparse
+import imutils
+import cv2
+import functools 
 
 
 def detect(image, model, labels):
@@ -47,7 +54,7 @@ def detect(image, model, labels):
         predictedLabels.append(label)
         probabilities.append(prob)
 
-    overall_probability = reduce(operator.mul, probabilities, 1)
+    overall_probability = functools.reduce(operator.mul, probabilities)
     return (predictedLabels, overall_probability)
 
 
