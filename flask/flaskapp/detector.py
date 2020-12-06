@@ -12,6 +12,7 @@ import argparse
 import imutils
 import cv2
 import functools 
+import operator
 
 
 def detect(image, model, labels):
