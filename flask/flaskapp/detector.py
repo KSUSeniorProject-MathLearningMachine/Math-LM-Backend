@@ -35,15 +35,16 @@ def init_labels(labels_file):
 
 
 def classify(image, model, labels):
-    # img = cv2.cvtColor(img.astype('float32'), cv2.COLOR_GRAY2BGR)
-    img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    img = ~img
-    img /= 255.0
+    #img = cv2.cvtColor(image.astype('float32'), cv2.COLOR_BGR2GRAY)
+    
+    #img = ~img
+    img = image / 255.0
 
 
     out = model.predict(img)
 
-    prediction_index = out.argmax(axis=-1)[0]
+    prediction_index = out.argmax(axis=1)[0]
+    info(prediction_index)
     prediction = labels[prediction_index]
     confidence = out[0][prediction_index]
 
@@ -183,7 +184,7 @@ def detect(image, model, labels):
 
         # img = (255.0 - cropped * 255.0)
         img = cropped
-
+        print(img)
         if VISUALIZE > 0:
             cv2.imshow("Cropped image", img)
             cv2.waitKey(0)
