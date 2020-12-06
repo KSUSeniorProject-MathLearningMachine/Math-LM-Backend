@@ -10,7 +10,7 @@ DARK_THRESH = 120
 VISUALIZATION_COLOR = (0, 255, 0)
 BOUNDING_BOX_PADDING = 5
 RESIZE_WIDTH=800
-INPUT_SIZE = (28, 28)
+INPUT_SIZE = (32, 32)
 MIN_CONF = 0.90
 
 VISUALIZE = 0
@@ -36,8 +36,12 @@ def init_labels(labels_file):
 
 def classify(image, model, labels):
     # img = cv2.cvtColor(img.astype('float32'), cv2.COLOR_GRAY2BGR)
+    img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    img = ~img
+    img /= 255.0
 
-    out = model.predict(image)
+
+    out = model.predict(img)
 
     prediction_index = out.argmax(axis=-1)[0]
     prediction = labels[prediction_index]
