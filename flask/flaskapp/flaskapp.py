@@ -13,7 +13,7 @@ cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 #MODEL = detector.init_model(os.environ['MODEL'])
-#LABELS = detector.init_labels(os.environ['LABELS'])
+LABELS = detector.init_labels(os.environ['LABELS'])
 
 
 @app.route('/')
@@ -66,7 +66,7 @@ def solve_image():
     im_arr = np.frombuffer(im_bytes, dtype=np.uint8)  # im_arr is one-dim Numpy array
     img = cv2.imdecode(im_arr, flags=cv2.IMREAD_COLOR)
 
-    detections, overall_confidence = detector.detect(img, MODEL, LABELS)
+    detections, overall_confidence = detector.detect(img, os.environ['MODEL'], LABELS)
     latex = object_parser.parse(detections)
 
     detections_json = [{
