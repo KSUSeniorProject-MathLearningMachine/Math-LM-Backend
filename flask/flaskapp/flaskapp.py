@@ -33,13 +33,15 @@ def ocr():
     im_arr = np.frombuffer(im_bytes, dtype=np.uint8)  # im_arr is one-dim Numpy array
     img = cv2.imdecode(im_arr, flags=cv2.IMREAD_COLOR)
 
-    detections, confidence = detector.detect(img, os.environ['MODEL'], LABELS)
+    detections, confidence, boxes = detector.detect(img, os.environ['MODEL'], LABELS)
 
     latex = object_parser.parse(detections)
 
     return {
         # "confidence": confidence,
-        "latex_styled": latex
+        "latex_styled": latex,
+        "detections": boxes,
+        "confidence": confidence
     }
 
     # detections_json = [{
@@ -71,7 +73,7 @@ def solve_image():
     im_arr = np.frombuffer(im_bytes, dtype=np.uint8)  # im_arr is one-dim Numpy array
     img = cv2.imdecode(im_arr, flags=cv2.IMREAD_COLOR)
 
-    detections, overall_confidence = detector.detect(img, os.environ['MODEL'], LABELS)
+    detections, overall_confidence, boxes = detector.detect(img, os.environ['MODEL'], LABELS)
     latex = object_parser.parse(detections)
 
     # detections_json = [{
@@ -92,9 +94,10 @@ def solve_image():
     #     'detections': detections_json,
     # }
     data = {
+        'detections': boxes,
         'solved': latex_solver.solve(latex),
         'input_detected': latex_solver.format_latex(latex),
-        'confidence': 1,
+        'confidence': overall_confidence,
     }
 
     return data, 200
