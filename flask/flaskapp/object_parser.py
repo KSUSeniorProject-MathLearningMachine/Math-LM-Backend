@@ -1,13 +1,14 @@
 def parse(detections):
     """Parse the detections and place them in order"""
-    latex = r""
+    latex = [label for label in detections]
 
-    for label in detections:
-        latex += r"{}".format(label)
+    latex = latex.replace('T', '+')
+    latex = latex.replace('t', '+')
+    latex = latex.replace('--', '=')
 
-    #detections.sort(key=lambda x: x[0][0][0])  # Sort by startX value
+    ltx = r""
 
-    # for (((startX, startY), (endX, endY)), label, confidence) in detections:
-    #     latex += r"{}".format(label)
+    for label in latex:
+        ltx += r"{}".format(label)
 
     return latex
