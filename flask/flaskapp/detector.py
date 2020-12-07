@@ -22,7 +22,7 @@ def detect(image, model, labels):
 
     # perform edge detection, find contours in the edge map, and sort the
     # resulting contours from left-to-right
-	blurred = cv2.threshold(edged, 220, 255, cv2.THRESH_BINARY)[1]
+	blurred = cv2.threshold(blurred, 220, 255, cv2.THRESH_BINARY)[1]
     edged = cv2.Canny(blurred, 30, 150)
     cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
         cv2.CHAIN_APPROX_SIMPLE)
