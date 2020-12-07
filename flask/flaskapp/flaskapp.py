@@ -13,7 +13,7 @@ cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 #MODEL = detector.init_model(os.environ['MODEL'])
-LABELS = detector.init_labels(os.environ['LABELS'])
+LABELS = []#detector.init_labels(os.environ['LABELS'])
 
 
 @app.route('/')
@@ -37,22 +37,27 @@ def ocr():
 
     latex = object_parser.parse(detections)
 
-    detections_json = [{
-        "box": {
-            "startX": str(startX),
-            "startY": str(startY),
-            "endX": str(endX),
-            "endY": str(endY),
-        },
-        "label": str(detection),
-        "confidence": str(confidence)
-    } for ((startX, startY), (endX, endY)), detection, confidence in detections]
-
     return {
-        "confidence": confidence,
-        "latex_styled": latex,
-        "detections": detections_json,
+        # "confidence": confidence,
+        "latex_styled": latex
     }
+
+    # detections_json = [{
+    #     "box": {
+    #         "startX": str(startX),
+    #         "startY": str(startY),
+    #         "endX": str(endX),
+    #         "endY": str(endY),
+    #     },
+    #     "label": str(detection),
+    #     "confidence": str(confidence)
+    # } for ((startX, startY), (endX, endY)), detection, confidence in detections]
+
+    # return {
+    #     "confidence": confidence,
+    #     "latex_styled": latex,
+    #     "detections": detections_json,
+    # }
 
 
 @app.route('/solve-image', methods=['POST'])
@@ -69,22 +74,27 @@ def solve_image():
     detections, overall_confidence = detector.detect(img, os.environ['MODEL'], LABELS)
     latex = object_parser.parse(detections)
 
-    detections_json = [{
-        "box": {
-            "startX": str(startX),
-            "startY": str(startY),
-            "endX": str(endX),
-            "endY": str(endY),
-        },
-        "label": str(detection),
-        "confidence": str(confidence)
-    } for ((startX, startY), (endX, endY)), detection, confidence in detections]
+    # detections_json = [{
+    #     "box": {
+    #         "startX": str(startX),
+    #         "startY": str(startY),
+    #         "endX": str(endX),
+    #         "endY": str(endY),
+    #     },
+    #     "label": str(detection),
+    #     "confidence": str(confidence)
+    # } for ((startX, startY), (endX, endY)), detection, confidence in detections]
 
+    # data = {
+    #     'solved': latex_solver.solve(latex),
+    #     'input_detected': latex_solver.format_latex(latex),
+    #     'confidence': overall_confidence,
+    #     'detections': detections_json,
+    # }
     data = {
         'solved': latex_solver.solve(latex),
         'input_detected': latex_solver.format_latex(latex),
-        'confidence': overall_confidence,
-        'detections': detections_json,
+        'confidence': 1,
     }
 
     return data, 200

@@ -89,7 +89,7 @@ def detect(image, model, labels):
     # define the list of label names
     labelNames = "0123456789"
     labelNames += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    labelNames += "+-"
+    labelNames += "+-=()"
     labelNames = [l for l in labelNames]
 
     predictedLabels = []
