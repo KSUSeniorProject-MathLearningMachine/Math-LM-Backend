@@ -107,14 +107,16 @@ def detect(image, model, labels):
         detected_boxes.append(
             {
                 "box":{
-                    "startX": x-(w//2),
-                    "startY": y-(h//2),
-                    "endX": x+(w//2),
-                    "endY": y+(h//2)
+                    "startX": str(x-(w//2)),
+                    "startY": str(y-(h//2)),
+                    "endX": str(x+(w//2)),
+                    "endY": str(y+(h//2))
                 },
-                "confidence": prob,
+                "confidence": str(prob),
                 "label": label
             }
         )
-    overall_probability = functools.reduce(operator.mul, probabilities)
-    return (predictedLabels, overall_probability, detected_boxes)    
+    overall_probability = 1.0
+    for prob in probabilities:
+        overall_probability *= prob
+    return (predictedLabels, str(overall_probability), detected_boxes)    
