@@ -39,8 +39,7 @@ def detect(image, model, labels):
 
         # filter out bounding boxes, ensuring they are neither too small
         # nor too large
-        #if (w >= 5 and w <= 150) and (h >= 15 and h <= 120):
-        if (True):
+        if (w >= 5) and (h >= 15):
             # extract the character and threshold it to make the character
             # appear as *white* (foreground) on a *black* background, then
             # grab the width and height of the thresholded image
