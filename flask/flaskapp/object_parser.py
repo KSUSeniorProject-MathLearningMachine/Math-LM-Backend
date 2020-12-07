@@ -1,6 +1,8 @@
 def parse(detections):
     """Parse the detections and place them in order"""
-    latex = [label for label in detections]
+    latex = ""
+    for label in detections:
+        latex += label
 
     latex = latex.replace('T', '+')
     latex = latex.replace('t', '+')
