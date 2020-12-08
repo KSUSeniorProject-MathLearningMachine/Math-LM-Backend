@@ -7,13 +7,14 @@ import random
 import skimage.morphology
 from tensorflow.keras.models import load_model
 from imutils.contours import sort_contours
+from imutils.object_detection import non_max_suppression
 import numpy as np
 import argparse
 import imutils
 import cv2
 import functools 
 import operator
-
+import itertools
 
 def detect(image, model):
     model = load_model(model)
@@ -32,10 +33,19 @@ def detect(image, model):
     # characters that we'll be OCR'ing
     chars = []
 
+    # (x1, y1, x2, y2)
+    cnts = np.array([make_real_rectangle(cv2.boundingRect(c)) for c in cnts])
+
+    cnts = non_max_suppression(cnts)
+
+    cnts = [make_fake_rectangle(c) for c in cnts]
+
+    cnts = sorted(cnts, key=lambda cnt: cnt[0])
+
     # loop over the contours
     for c in cnts:
         # compute the bounding box of the contour
-        (x, y, w, h) = cv2.boundingRect(c)
+        (x, y, w, h) = c
 
         # filter out bounding boxes, ensuring they are neither too small
         # nor too large
@@ -102,12 +112,32 @@ def detect(image, model):
         label = labelNames[i]
         if label == 'T':
             label = '+'
+        
         predictedLabels.append(label)
         probabilities.append(prob)
         cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
         cv2.putText(image, label, (x - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 2)
-    overall_probability = 0
-    for prob in probabilities:
-        overall_probability += prob
-    overall_probability /= len(probabilities)
-    return (predictedLabels, str(overall_probability), image)    
+
+    # If there is only one instance of a parenthesis, assume that the
+    #  machine learning model incorrectly identfied a number one and 
+    #  replace it.
+    predictedLabels = ['1' if (c == '(' or c == ')') else c for c in predictedLabels]
+            
+    overall_probability = sum(probabilities) / len(probabilities)
+
+    return (predictedLabels, str(overall_probability), image)
+    
+
+def make_real_rectangle(box):
+    x1 = box[0]
+    y1 = box[1]
+    x2 = box[0] + box[2]
+    y2 = box[1] + box[3]
+    return (x1, y1, x2, y2)
+
+def make_fake_rectangle(box):
+    w = abs(box[2] - box[0]) 
+    h = abs(box[1] - box[3])
+    x = box[0]
+    y = box[1]
+    return (x, y, w, h)
