@@ -32,7 +32,7 @@ def ocr():
     img = cv2.imdecode(im_arr, flags=cv2.IMREAD_COLOR)
 
     detections, confidence, image = detector.detect(img, os.environ['MODEL'])
-    retval, buffer = cv2.imencode('png', image)
+    retval, buffer = cv2.imencode('.png', image)
     image = base64.b64encode(buffer)
     latex = object_parser.parse(detections)
 
@@ -56,7 +56,7 @@ def solve_image():
 
     detections, overall_confidence, image = detector.detect(img, os.environ['MODEL'])
     latex = object_parser.parse(detections)
-    retval, buffer = cv2.imencode('png', image)
+    retval, buffer = cv2.imencode('.png', image)
     image = base64.b64encode(buffer)
 
     data = {
