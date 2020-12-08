@@ -7,13 +7,11 @@ import numpy as np
 import base64
 from flask_cors import CORS, cross_origin
 import os
+import base64
 
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
-
-MODEL = detector.init_model(os.environ['MODEL'])
-LABELS = detector.init_labels(os.environ['LABELS'])
 
 
 @app.route('/')
@@ -33,25 +31,15 @@ def ocr():
     im_arr = np.frombuffer(im_bytes, dtype=np.uint8)  # im_arr is one-dim Numpy array
     img = cv2.imdecode(im_arr, flags=cv2.IMREAD_COLOR)
 
-    detections, confidence = detector.detect(img, MODEL, LABELS)
-
+    detections, confidence, image = detector.detect(img, os.environ['MODEL'])
+    retval, buffer = cv2.imencode('.png', image)
+    image = base64.b64encode(buffer)
     latex = object_parser.parse(detections)
 
-    detections_json = [{
-        "box": {
-            "startX": str(startX),
-            "startY": str(startY),
-            "endX": str(endX),
-            "endY": str(endY),
-        },
-        "label": str(detection),
-        "confidence": str(confidence)
-    } for ((startX, startY), (endX, endY)), detection, confidence in detections]
-
     return {
-        "confidence": confidence,
         "latex_styled": latex,
-        "detections": detections_json,
+        "image":image,
+        "confidence": confidence
     }
 
 
@@ -66,25 +54,16 @@ def solve_image():
     im_arr = np.frombuffer(im_bytes, dtype=np.uint8)  # im_arr is one-dim Numpy array
     img = cv2.imdecode(im_arr, flags=cv2.IMREAD_COLOR)
 
-    detections, overall_confidence = detector.detect(img, MODEL, LABELS)
+    detections, overall_confidence, image = detector.detect(img, os.environ['MODEL'])
     latex = object_parser.parse(detections)
-
-    detections_json = [{
-        "box": {
-            "startX": str(startX),
-            "startY": str(startY),
-            "endX": str(endX),
-            "endY": str(endY),
-        },
-        "label": str(detection),
-        "confidence": str(confidence)
-    } for ((startX, startY), (endX, endY)), detection, confidence in detections]
+    retval, buffer = cv2.imencode('.png', image)
+    image = base64.b64encode(buffer)
 
     data = {
+        'image': image.decode('utf-8'),
         'solved': latex_solver.solve(latex),
         'input_detected': latex_solver.format_latex(latex),
         'confidence': overall_confidence,
-        'detections': detections_json,
     }
 
     return data, 200
