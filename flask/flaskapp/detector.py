@@ -15,14 +15,13 @@ import functools
 import operator
 
 
-def detect(image, model, labels):
+def detect(image, model):
     model = load_model(model)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 
     # perform edge detection, find contours in the edge map, and sort the
     # resulting contours from left-to-right
-	blurred = cv2.threshold(blurred, 220, 255, cv2.THRESH_BINARY)[1]
     edged = cv2.Canny(blurred, 30, 150)
     cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL,
         cv2.CHAIN_APPROX_SIMPLE)
@@ -40,7 +39,7 @@ def detect(image, model, labels):
 
         # filter out bounding boxes, ensuring they are neither too small
         # nor too large
-        if (w >= 5) and (h >= 15):
+        if (w >= 32 and w <= image.shape[0]*1/2) or h >= 32:
             # extract the character and threshold it to make the character
             # appear as *white* (foreground) on a *black* background, then
             # grab the width and height of the thresholded image
@@ -94,7 +93,6 @@ def detect(image, model, labels):
 
     predictedLabels = []
     probabilities = []
-    detected_boxes = []    
     # loop over the predictions and bounding box locations together
     for (pred, (x, y, w, h)) in zip(preds, boxes):
         # find the index of the label with the largest corresponding
@@ -104,19 +102,10 @@ def detect(image, model, labels):
         label = labelNames[i]
         predictedLabels.append(label)
         probabilities.append(prob)
-        detected_boxes.append(
-            {
-                "box":{
-                    "startX": str(x-(w//2)),
-                    "startY": str(y-(h//2)),
-                    "endX": str(x+(w//2)),
-                    "endY": str(y+(h//2))
-                },
-                "confidence": str(prob),
-                "label": label
-            }
-        )
-    overall_probability = 1.0
+        cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        cv2.putText(image, label, (x - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 0), 2)
+    overall_probability = 0
     for prob in probabilities:
-        overall_probability *= prob
-    return (predictedLabels, str(overall_probability), detected_boxes)    
+        overall_probability += prob
+    overall_probability /= len(probabilities)
+    return (predictedLabels, str(overall_probability), image)    
