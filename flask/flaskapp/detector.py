@@ -121,7 +121,8 @@ def detect(image, model):
     # If there is only one instance of a parenthesis, assume that the
     #  machine learning model incorrectly identfied a number one and 
     #  replace it.
-    predictedLabels = ['1' if (c == '(' or c == ')') else c for c in predictedLabels]
+    if predictedLabels.count('(') + predictedLabels.count(')') == 1:
+        predictedLabels = ['1' if (c == '(' or c == ')') else c for c in predictedLabels]
             
     overall_probability = sum(probabilities) / len(probabilities)
 
