@@ -60,7 +60,7 @@ def solve_image():
     image = base64.b64encode(buffer)
 
     data = {
-        'image': image,
+        'image': str(image),
         'solved': latex_solver.solve(latex),
         'input_detected': latex_solver.format_latex(latex),
         'confidence': overall_confidence,
