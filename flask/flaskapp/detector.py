@@ -100,8 +100,8 @@ def detect(image, model):
         i = np.argmax(pred)
         prob = pred[i]
         label = labelNames[i]
-		if label == 'T':
-			label = '+'
+        if label == 'T':
+            label = '+'
         predictedLabels.append(label)
         probabilities.append(prob)
         cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
